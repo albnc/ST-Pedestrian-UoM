@@ -29,8 +29,8 @@ pedata <- pedata %>%
     year = year,
     month = month,
     day = day,
-    hour = hour,
-    tz = "Australia/Melbourne") # there is a problem with daylight time in October 2009
+    hour = hour)#,
+    #tz = "Australia/Melbourne") # there is a problem with daylight time in October 2009
   ) 
 
 ## Amount of missing data
@@ -46,7 +46,7 @@ pedata %>%
 
 ## Compute cases per sensor
 pedata %>% 
-  count(sensorID, wt = count)
+  count(sensorID, wt=count)
 
 ## Compute cases per year and sensor over years
 pdt <- pedata %>% 
