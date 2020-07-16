@@ -39,6 +39,5 @@ load_pedata <- funtion(input, sensors='all'){
     filtered <- filter(pedata, id == sensors)
   }
   
-  
   return(filtered)
 }
