@@ -1,13 +1,14 @@
 library(tidyverse)
 library(lubridate)
 library(purrr)
+library(waveslim)
 
 
 ###########################################################
 ## LOAD PEDESTRIAN DATA
 ## output:  tibble grouped by sensor ID
 ##
-load_pedata <- function(input, idfilter=NULL) {
+load_pedata <- function(filename=NULL, idfilter=NULL) {
   ## DATA -------------------------------------------
   ## Upload CSV file
   csv <- read.csv("C:/Users/engan/GitHub/Pedestrian_Counting_System___2009_to_Present__counts_per_hour_.csv",
@@ -46,13 +47,45 @@ load_pedata <- function(input, idfilter=NULL) {
   
   ## Nest data grouping by sensor ID
   sensors <- pedata %>% 
+    arrange(sensorID, datetime) %>% 
     group_by(sensorID) %>% 
     nest()
   
   ## Filtering data
   if(!is.null(idfilter)) {
-    sensors <- filter(sensors, sensorID == idfilter)
+    sensors <- sensors %>% 
+      filter(sensorID %in% idfilter)
   }
   
   return(sensors)
+}
+
+###########################################################
+## WAVELET DECOMPOSITION ANALYSIS
+## output:  decomposition signal in approximation and detail
+##          coefficients
+##
+wavlevels <- function(signal, wfam="la8", wtype="modwt"){
+  ## Level 3 (8h) is the maximum level to analyze in Wavelet decomposition for
+  ## pedestrian hourly data
+  nlevel = 3
+  colnames = c()
+  
+  ## Wavelet analysis
+  for (i in 1:nlevel) {
+    ## MRA - MultiResolution Analysis 
+    wav <- mra(x=signal$count, wf=wfam, J = i, method = wtype)
+    colname <- paste("s",i, sep="") 
+    signal[[colname]] <- with(signal, wav[[length(wav)]])
+  }
+  
+  df <- signal %>% 
+    select(datetime, count, num_range("s",1:nlevel)) %>% 
+    pivot_longer(!datetime, names_to = "typesignal", values_to = "value")
+  
+  ## Plot
+  ggplot(df, mapping=aes(x=datetime, y=value, colour=typesignal)) +
+    geom_point() +
+    geom_line()
+  
 }
