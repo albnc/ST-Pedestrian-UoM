@@ -3,7 +3,6 @@ library(lubridate)
 library(purrr)
 library(waveslim)
 
-
 ###########################################################
 ## LOAD PEDESTRIAN DATA
 ## output:  tibble grouped by sensor ID
@@ -43,7 +42,7 @@ load_pedata <- function(filename=NULL, idfilter=NULL) {
     ) 
   
   ## Amount of missing data
-  print(c("Missing data: ", sum(is.na(pedata$datetime))))
+  print(paste(c("Missing data: ", sum(is.na(pedata$datetime))),sep=" "))
   
   ## Nest data grouping by sensor ID
   sensors <- pedata %>% 
@@ -86,6 +85,7 @@ wavlevels <- function(signal, wfam="la8", wtype="modwt"){
   ## Plot
   ggplot(df, mapping=aes(x=datetime, y=value, colour=typesignal)) +
     geom_point() +
-    geom_line()
+    geom_line() +
+    ylim(min(df$value), max(df$value))
   
 }
