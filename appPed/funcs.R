@@ -7,13 +7,13 @@ library(waveslim)
 ## LOAD PEDESTRIAN DATA
 ## output:  tibble grouped by sensor ID
 ##
-load_pedata <- function(filename=NULL, idfilter=NULL) {
+load_pedata <- function(idfilter = NULL) {
   ## DATA -------------------------------------------
   ## Upload CSV file
-  csv <- read.csv("C:/Users/engan/GitHub/ST-Pedestrian-UoM/appPed/data/Pedestrian_Counting_System___2009_to_Present__counts_per_hour_.csv",
+  csv <- read.csv("data/Pedestrian_Counting_System___2009_to_Present__counts_per_hour_.csv",
                   header = TRUE, sep = ",")
   
-  pos <- read.csv("./_data/Pedestrian_Counting_System_-_Sensor_Locations.csv", header = TRUE, sep=",")
+  pos <- read.csv("data/Pedestrian_Counting_System_-_Sensor_Locations.csv", header = TRUE, sep=",")
   
   db <- merge(csv, pos, by.x = "Sensor_ID", by.y="sensor_id")
   
@@ -58,23 +58,6 @@ load_pedata <- function(filename=NULL, idfilter=NULL) {
   
   return(sensors)
 }
-
-###########################################################
-## BOXPLOT OF DATA
-## output:  boxplot of all the dataset in years, months,
-##          days and hours
-##
-boxplotTime <- function(signal){
-  
-  p <- ggplot(signal, aes(hour, count)) +
-    geom_boxplot(outlier.colour = "red", outlier.alpha = .1)
-  
-  p + facet_grid(vars(year), vars(month))
-  #p + facet_wrap(~year)
-  #p + facet_wrap(~month)
-  #p + facet_wrap(~day)
-}
-
 
 
 ###########################################################

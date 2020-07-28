@@ -7,10 +7,10 @@ shinyUI(
 
         # Application title
         titlePanel("Spatio-Temporal Pedestrian Analysis"),
-        # Application Autor
+        # Application Author
         tags$p("André Luiz Cunha"),
         tags$hr(),
-        plotOutput(outputId = "figTime")
         
+        mainPanel(plotOutput("figTime"))
     )
 )
