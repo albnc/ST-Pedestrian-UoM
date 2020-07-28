@@ -36,8 +36,8 @@ In space domain the objective is identify the spread of the each type of event.
 ## 4. Daily report
 
 ### 21-07-2020
-[] Code function to open pedestrian data
-[] There is some error with sunlight, correct them on dataset
-[] Time domain analysis
-[] Wavelet analysis
-[] Spatio analysis
+- [ ] Code function to open pedestrian data
+- [ ] There is some error with sunlight, correct them on dataset
+- [ ] Time domain analysis
+- [ ] Wavelet analysis
+- [ ] Spatio analysis

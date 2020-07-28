@@ -20,10 +20,10 @@ load_pedata <- function(filename=NULL, idfilter=NULL) {
   ## Create a tibble dataset
   pedata <- tibble(
     id = db$ID,
-    year = db$Year,
-    month = match(db$Month,month.name),
-    day = db$Mdate,
-    hour = db$Time,
+    year = as.factor(db$Year),
+    month = as.factor(match(db$Month,month.name)),
+    day = as.factor(db$Mdate),
+    hour = as.factor(db$Time),
     sensorID = db$Sensor_ID,
     sensorName = db$Sensor_Name,
     count = db$Hourly_Counts,
@@ -42,7 +42,7 @@ load_pedata <- function(filename=NULL, idfilter=NULL) {
     ) 
   
   ## Amount of missing data
-  print(paste(c("Missing data: ", sum(is.na(pedata$datetime))),sep=" "))
+  paste("Missing data: ", sum(is.na(pedata$datetime)))
   
   ## Nest data grouping by sensor ID
   sensors <- pedata %>% 
@@ -58,6 +58,24 @@ load_pedata <- function(filename=NULL, idfilter=NULL) {
   
   return(sensors)
 }
+
+###########################################################
+## BOXPLOT OF DATA
+## output:  boxplot of all the dataset in years, months,
+##          days and hours
+##
+boxplotTime <- function(signal){
+  
+  p <- ggplot(signal, aes(hour, count)) +
+    geom_boxplot(outlier.colour = "red", outlier.alpha = .1)
+  
+  p + facet_grid(vars(year), vars(month))
+  #p + facet_wrap(~year)
+  #p + facet_wrap(~month)
+  #p + facet_wrap(~day)
+}
+
+
 
 ###########################################################
 ## WAVELET DECOMPOSITION ANALYSIS
