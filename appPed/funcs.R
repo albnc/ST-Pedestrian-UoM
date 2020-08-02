@@ -20,16 +20,17 @@ load_pedata <- function(idfilter = NULL) {
   ## Create a tibble dataset
   pedata <- tibble(
     id = db$ID,
-    year = as.factor(db$Year),
-    month = as.factor(match(db$Month,month.name)),
-    day = as.factor(db$Mdate),
-    hour = as.factor(db$Time),
+    year = db$Year,
+    month = match(db$Month,month.name),
+    day = db$Mdate,
+    hour = db$Time,
     sensorID = db$Sensor_ID,
     sensorName = db$Sensor_Name,
     count = db$Hourly_Counts,
     lat = db$latitude,
     long = db$longitude
-  )
+    )
+  
   
   ## Time transformation
   pedata <- pedata %>% 
@@ -37,12 +38,16 @@ load_pedata <- function(idfilter = NULL) {
       year = year,
       month = month,
       day = day,
-      hour = hour)#,
+      hour = hour),
       #tz = "Australia/Melbourne") # there is a problem with daylight time in October 2009
-    ) 
+      year = as.factor(year),
+      month = as.factor(month),
+      day = as.factor(day),
+      hour = as.factor(hour)
+    )
   
   ## Amount of missing data
-  paste("Missing data: ", sum(is.na(pedata$datetime)))
+  #paste("Missing data: ", sum(is.na(pedata$datetime)))
   
   ## Nest data grouping by sensor ID
   sensors <- pedata %>% 
