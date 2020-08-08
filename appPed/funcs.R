@@ -89,9 +89,10 @@ wavlevels <- function(signal, wfam="la8", wtype="modwt"){
     pivot_longer(!datetime, names_to = "typesignal", values_to = "value")
   
   ## Plot
-  ggplot(df, mapping=aes(x=datetime, y=value, colour=typesignal)) +
+  ggplot(df, mapping=aes(x=datetime, y=value, group=typesignal)) +
+    geom_line(aes(color=typesignal, size=typesignal)) +
     geom_point() +
-    geom_line() +
+    scale_size_manual(values=c(1.5,rep(.5,3))) +
     ylim(min(df$value), max(df$value))
   
 }

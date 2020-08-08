@@ -1,10 +1,21 @@
 library(shiny)
 library(dygraphs)
 
+
 # Define server logic
 shinyServer(function(input, output) {
-    output$figTime <- renderPlot({
-      ggplot(sy, aes(x=datetime, y=count)) + geom_line()
+  
+  datasensor <- reactive({
+    pedata$data[[input$id]] %>% 
+      filter(year == 2019)
+  })
+  
+  output$figTime <- renderPlot({
+    ggplot(datasensor(), aes(x=datetime, y=count)) + geom_line()
+      
+      
+      
+      
       # p <- dygraph(don) %>%
       #   dyOptions(labelsUTC = TRUE, fillGraph=TRUE, fillAlpha=0.1, drawGrid = FALSE, colors="#D8AE5A") %>%
       #   dyRangeSelector() %>%
