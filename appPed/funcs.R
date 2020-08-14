@@ -3,17 +3,19 @@ library(lubridate)
 library(purrr)
 library(waveslim)
 
+
 ###########################################################
 ## LOAD PEDESTRIAN DATA
 ## output:  tibble grouped by sensor ID
 ##
-load_pedata <- function(idfilter = NULL) {
+load_pedata <- function(idfilter = NULL, wdpath = "") {
   ## DATA -------------------------------------------
   ## Upload CSV file
-  csv <- read.csv("data/Pedestrian_Counting_System___2009_to_Present__counts_per_hour_.csv",
+  csv <- read.csv(paste0(wdpath, "data/Pedestrian_Counting_System___2009_to_Present__counts_per_hour_.csv"),
                   header = TRUE, sep = ",")
   
-  pos <- read.csv("data/Pedestrian_Counting_System_-_Sensor_Locations.csv", header = TRUE, sep=",")
+  pos <- read.csv(paste0(wdpath, "data/Pedestrian_Counting_System_-_Sensor_Locations.csv"), 
+                  header = TRUE, sep=",")
   
   db <- merge(csv, pos, by.x = "Sensor_ID", by.y="sensor_id")
   
