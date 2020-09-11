@@ -3,4 +3,4 @@
 .RData
 .Ruserdata
 find ./* -size +100M | cat >> .gitignore
-appPed/data/Pedestrian_Counting_System___2009_to_Present__counts_per_hour_.csv
+data/Pedestrian_Counting_System___2009_to_Present__counts_per_hour_.csv

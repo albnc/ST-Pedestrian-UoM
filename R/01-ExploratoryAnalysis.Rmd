@@ -1,0 +1,265 @@
+---
+title: "Capstone Project UoM-MSE-IE"
+author: "Andre Luiz Cunha"
+date: "`r Sys.Date()`"
+#runtime: shiny
+output: 
+  html_document:
+    number_section : true
+params:
+  year: 2019
+  ids: 10
+---
+
+```{r global-options, include=FALSE}
+library(shiny)
+library(viridis)
+library(waveslim)
+library(lubridate)
+library(tidyverse)
+library(leaflet)
+library(hrbrthemes)
+
+knitr::opts_chunk$set(fig.width = 12, fig.height = 8, fig.path = "Figs/",
+                      echo = TRUE)
+```
+
+# Exploratory Analysis
+
+## Dataset
+The dataset was obtained at [City of Melbourne - Pedestrian Counting System](http://www.pedestrian.melbourne.vic.gov.au/). The data is from pedestrian counting system (loop sensor) and it contains hourly counts from 2009 to 2019. The main idea is to explore these data and figure out some spatio-temporal relationship between sensors, and detect events automatically.
+
+In this example was used only the year of 2019.
+
+```{r load dataset}
+## Filenames
+datafile = "../../data/Pedestrian_Counting_System___2009_to_Present__counts_per_hour_.csv"
+#datafile = "C:/Users/engan/GitHub/ST-Pedestrian-UoM/data/Pedestrian_Counting_System___2009_to_Present__counts_per_hour_.csv"
+posfile = "../../data/Pedestrian_Counting_System_-_Sensor_Locations.csv"
+  
+## Upload CSV files
+csv.data <- read.csv(datafile, header = TRUE, sep = ",")
+csv.pos <- read.csv(posfile, header = TRUE, sep=",")
+
+## Create dataset
+db <- merge(csv.data, csv.pos, by.x = "Sensor_ID", by.y="sensor_id")
+
+## Create a tibble dataset
+  pedata <- tibble(
+    id = db$ID,
+    sensorID = db$Sensor_ID,
+    sensorName = db$Sensor_Name,
+    count = db$Hourly_Counts,
+    lat = db$latitude,
+    long = db$longitude
+  ) %>% 
+    mutate( datetime = make_datetime(
+      year = db$Year,
+      month = match(db$Month,month.name),
+      day = db$Mdate,
+      hour = db$Time),
+    )
+
+## Filter year 2019
+ped.year <- pedata %>% 
+  filter(year(datetime) == params$year) %>% 
+  arrange(sensorID, datetime)
+
+rm(list=c("csv.data", "csv.pos", "db", "pedata"))
+ped.year
+```
+
+Here are the map with the sensors in number of hours and total hourly count.
+
+```{r map-sensors}
+## Select the variables
+df <- ped.year %>% 
+  group_by(sensorID, lat, long) %>% 
+  summarise(hour.year = n()/(24*yday(make_date(params$year,12,31))), 
+            count.total = sum(count), count.mean = mean(count)) %>%
+  mutate(content=paste(sep=";", 
+                       paste0("ID: ", sensorID), 
+                       paste0("%YEAR: ", round(hour.year,2)), 
+                       paste0("AVG: ",round(count.mean,2))))
+
+## Plot map
+pal <- colorNumeric(
+  palette = "viridis",
+  domain = df$count.mean
+)
+
+leaflet(df) %>% 
+  fitBounds(~min(long), ~min(lat), ~max(long), ~max(lat)) %>%
+  addCircles(lng = ~long, lat = ~lat, weight = 1, radius = ~sqrt(count.mean)*3, 
+             label = ~content, color = ~pal(count.mean)) %>%  
+  addLegend(pal=pal, values = ~count.mean) %>% 
+  #addProviderTiles(providers$Stamen.Toner)
+  addProviderTiles(providers$CartoDB.Positron) 
+  #addProviderTiles(providers$Esri.NatGeoWorldMap)
+
+```
+
+
+## Time-based analysis
+
+Selecting the sensor by ID, two figures depict the all data recorded in the period and the heatmap considering 'hour' and 'day'.
+
+```{r time-based-shiny}
+# ## Select sensor ID
+# sensorids <- unique(ped.year$sensorID)
+# selectInput("id_sensors", label = "Sensor ID:",
+#               choices = sensorids)
+# 
+# ## Filter dataset by sensorID selected
+# df1sensor <- ped.year %>% 
+#   select(sensorID, datetime, count) %>% 
+#   mutate(year=year(datetime),
+#          month=month(datetime, label=TRUE),
+#          day=day(datetime),
+#          hour=hour(datetime))
+# 
+# df1sensor <- reactive({
+#   df1sensor %>% filter(sensorID == input$id_sensors)
+# })
+#  
+# ## Plot timeline
+# renderPlot({
+#   df1sensor %>% filter(sensorID == input$id_sensors) %>% 
+#   ggplot(aes(x=datetime, y=count)) + geom_line()
+# })
+# 
+# ## Plot heatmap
+# renderPlot({
+#   p <- ggplot(df1sensor %>% filter(sensorID == 1), #input$id_sensors), 
+#               aes(day, hour, fill=count)) +
+#     geom_tile(color="white", size=0.1) +
+#     scale_fill_viridis("Hourly Count", option = "C")
+#   p <-p + facet_grid(month)
+#   p <-p + scale_y_continuous(trans = "reverse", breaks = unique(df1sensor$hour))
+#   p <-p + scale_x_continuous(breaks =c(1,10,20,31))
+#   p <-p + theme_minimal(base_size = 8)
+#   p <-p + labs(title="Project", x="Day", y="Hour Commencing")
+#   p <-p + theme(legend.position = "bottom")+
+#   theme(plot.title=element_text(size = 14))+
+#   theme(axis.text.y=element_text(size=6)) +
+#   theme(strip.background = element_rect(colour="white"))+
+#   theme(plot.title=element_text(hjust=0))+
+#   theme(axis.ticks=element_blank())+
+#   theme(axis.text=element_text(size=7))+
+#   theme(legend.title=element_text(size=8))+
+#   theme(legend.text=element_text(size=6))
+# })
+```
+
+```{r time-based}
+## Filter dataset by sensorID selected
+df1sensor <- ped.year %>%
+  select(sensorID, datetime, count) %>%
+  filter(sensorID == params$ids) %>% 
+  mutate(year=year(datetime),
+         month=month(datetime, label=TRUE),
+         day=day(datetime),
+         hour=hour(datetime))
+
+## Plot timeseries
+df1sensor %>% 
+  ggplot(aes(datetime,count)) +
+    geom_line(color="#69b3a2")
+
+## Plot boxplot
+df1sensor %>% 
+  ggplot(aes(x=month, y=count, fill=month)) +
+  #geom_boxplot(coef = 1.5, outlier.color = "red", outlier.size = 1) +
+  geom_violin() +
+  scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+  geom_jitter(color="black", size=0.4, alpha = 0.4) +
+  theme(
+    legend.position = "none"
+  ) +
+  xlab("Month") + ylab("Hourly Count")
+
+## Plot heatmap
+df1sensor %>% 
+  ggplot(aes(x=day,y=hour,fill=count)) +
+  geom_tile(color="white", size=0.1) +
+  scale_fill_viridis(name="Hrly Count" ,option ="C") +
+  facet_wrap(~month) +
+  scale_y_continuous(trans = "reverse", breaks = unique(df1sensor$hour)) +
+  scale_x_continuous(breaks =c(1,10,20,31))
+```
+## Wavelet Analysis
+This analysis aims to build a method to automaticaly detect anomalies using Wavelets and also propose some method to recognize patterns on pedestrian traffic.
+
+### Time resolution
+As the dataset brings hourly counts, each level of the Wavelet coefficients represent an data aggregation on power of 2 ($2^n$). To understand that, each level represents:
+
+```{r wavelet-decomposition}
+n.levels = 15
+for(i in 1:n.levels) {
+  hours <- 2^i
+  print(paste0("Level: ", i, " -> ", floor(hours/(30*24)), " months, ", floor((hours%%(24*30))/24), " days, ", (hours%%24), " hours"))
+}
+```
+The level 3 is an interesting point because it is possible to analyse the data in 3 periods of 8 hours (morning, afternoon, night). The level 7 represent almost one working week, however the problem here is whether the week starts on Monday, the second week will start on Saturday, so the weeks are not considering the same weekdays. The level 13 cover almost one entire year.
+
+
+### Maximal Overlap Discrete Wavelet Transform (MODWT)
+Applying the Maximal Overlap Discrete Wavelet Transform (MODWT) analysis using the Haar as mother Wavelet. 
+
+```{r wavelet-data}
+## Apply Wavelet
+wav <- mra(df1sensor$count, wf="haar", J=4, method="modwt")
+wav.data <- tibble(
+  datetime = df1sensor$datetime,
+  signal = df1sensor$count,
+  D4 = wav$D4,
+  D3 = wav$D3,
+  D2 = wav$D2,
+  D1 = wav$D1,
+  S4 = wav$S4,
+  S3 = S4 + D4,
+  S2 = S3 + D3,
+  S1 = S2 + D2,
+  S0 = S1 + D1
+)
+```
+
+```{r wavelet-heatmap}
+
+## Plot heatmap
+wav.data %>% 
+  ggplot(aes(x=day(datetime),y=hour(datetime),fill=S3)) +
+  geom_tile(color="white", size=0.1) +
+  scale_fill_viridis(name="Hrly Count" ,option ="C") +
+  facet_wrap(~month(datetime, label = TRUE)) +
+  scale_y_continuous(trans = "reverse", breaks = unique(hour(wav.data$datetime))) +
+  scale_x_continuous(breaks =c(1,10,20,31))
+```
+Trying to understand the correlation between the results.
+```{r tests}
+ggplot(wav.data, aes(x=signal, y=S1)) +
+  geom_point() +
+  geom_abline(slope=1, intercept = 0, colour="red", size=1.0) +
+  theme_minimal()
+```
+
+### Outliers Analysis
+```{r outliers}
+
+outlier <- function(df, varname){
+  thresh1 <- mean(df[[varname]]) - 2 * sd(df[[varname]])
+  thresh2 <- mean(df[[varname]]) + 2 * sd(df[[varname]])
+  
+  ggplot(df) +
+    geom_line(aes(x=datetime, y=varname)) +
+    geom_point(aes(x=datetime, y=varname,
+                    colour = (varname > thresh1 & varname < thresh2))) +
+    theme_minimal()
+}
+
+outlier(wav.data, "signal")
+
+```
+
+## Variogram-Kriging Analysis
+There two tutorials on these pages ([tutorial1](https://rpubs.com/nabilabd/118172), [tutorial2](https://rpubs.com/nabilabd/134781))
