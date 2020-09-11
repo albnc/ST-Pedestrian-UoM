@@ -1,0 +1,92 @@
+---
+title: "WaveletAnalysis"
+author: "Andre Luiz Cunha"
+date: "10/08/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(plotly)
+
+## Parameters to define############## 
+idx = c(57) 
+stdev = 1.5
+yvalue = c(2019)
+mvalue = c(1,2,3)
+```
+
+
+## 1. Dataset
+The dataset was obtained at [City of Melbourne - Pedestrian Counting System](http://www.pedestrian.melbourne.vic.gov.au/). The data is from pedestrian counting system (loop sensor) and it contains hourly counts from 2009 to 2019. The main idea is to explore these data and figure out some spatio-temporal relationship between sensors, and detect events automatically.
+
+```{r dataset}
+source("appPed/funcs.R")
+pedata <- load_pedata(wdpath = "appPed/")
+```
+
+
+## 2. Analysis
+### 2.1 Outliers with boxplot
+First, making the boxplot from all sensors. It is possible to notice that fixing the standard deviation, there are some sensors with huge amount of "outliers" whereas another there are no "outliers" looking all the year.
+
+```{r}
+sy <- pedata %>% 
+  unnest(cols = c(data)) %>% 
+  ungroup() %>% 
+  filter(year %in% yvalue) # %in% using to multiple selections
+
+ggplot(sy, aes(x=as.factor(sensorID), y = count)) +
+  geom_boxplot(coef = stdev, outlier.color = "red", outlier.size = 1)
+```
+Plotting one sensor and looking the boxplot over the months.
+
+```{r}
+ggplot(sy %>% filter(sensorID == idx), aes(x=month, y = count)) +
+  geom_boxplot(coef = stdev, outlier.color = "red", outlier.size = 1) +
+  xlab("Month") + ylab("Hourly Count")
+```
+### Temporal pattern
+Plotting two temporal axis with hour fixed.
+```{r}
+data <- sy %>%
+  filter(sensorID %in% idx, month %in% mvalue) %>%
+  mutate(wkday = weekdays(datetime, TRUE)) %>%
+  select(day, hour, wkday, count) %>%
+  group_by(day, wkday, hour) %>% 
+  summarise(avg = mean(count), std = sd(count))
+
+data <- data %>% 
+  mutate(text = paste0("d: ",day,"\n", "h: ", hour, "\n", "week: ", wkday, "\n", "mean: ", round(avg,2), "\n", "std: ", round(std,2) ))
+  
+p <- ggplot(data, aes(x=day, y=hour, fill=avg, text=text) ) +
+  geom_tile() +
+  scale_fill_viridis(discrete = FALSE)
+  #+ facet_wrap(~month)
+
+ggplotly(p, tooltip="text")
+```
+
+
+
+### Outliers with Wavelet
+```{r}
+signal <- sy %>% 
+  filter(sensorID == idx)
+
+# Apply Wavelet
+swav <- mra(signal$count, wf="haar", J=1, method = "modwt")
+signal <- signal %>% 
+  mutate("s1" = swav$S1, "d1" = swav$D1)
+
+# Identify the outliers based on Details
+outs <- (abs(signal$d1) > devpad*sd(signal$d1))
+
+# Plot Wavelet Outliers
+ggplot(signal, aes(x=datetime, y=s1)) +
+  geom_line() +
+  geom_point(data=signal[outs,], aes(x=datetime, y=s1), color="red", size=1)
+  
+```
+

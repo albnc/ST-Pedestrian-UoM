@@ -19,11 +19,12 @@ shinyUI(fluidPage(
                  tags$li("Patricia Sauri"),
                  tags$li("Jessica Tong"),
                  tags$li("Hans Gao"),
-                 tags$li("Marcus Rzanovski")
+                 tags$li("Marcus Rzanovski"),
+                 tags$hr()
              ),
 
              # Inputs
-             numericInput("id", "Sensor ID:",
+             numericInput("id", "Choose a sensor:",
                           value = ped.data$sensorID[[1]],
                           min = ped.data$sensorID[[1]],
                           max = ped.data$sensorID[[length(ped.data$sensorID)]]),
