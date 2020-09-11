@@ -2,5 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+data/pedestrian_counts_2009-2019.csv
 find ./* -size +100M | cat >> .gitignore
-data/Pedestrian_Counting_System___2009_to_Present__counts_per_hour_.csv
