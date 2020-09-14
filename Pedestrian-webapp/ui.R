@@ -28,18 +28,41 @@ shinyUI(fluidPage(
                           value = ped.data$sensorID[[1]],
                           min = ped.data$sensorID[[1]],
                           max = ped.data$sensorID[[length(ped.data$sensorID)]]),
+             
+             leafletOutput("mapSensors", width = "100%")
         ),
         mainPanel(
              tabsetPanel(
                  tabPanel(
                      "Data",
-                     leafletOutput("mapSensors", width = "100%"),
-                     plotOutput("figTime", width="100%")
+                     tags$h2("Data Exploratory Analysis"),
+                     tags$h3("Times series"),
+                     dygraphOutput("dygraphFig", width="100%"),
+                     plotlyOutput("plotlyFig", width="100%"),
+                     plotOutput("ggplotFig", width="100%"),
+                     tags$h3("Weekdays pattern"),
+                     plotOutput("weekFig", width="100%")
+                     
                  ),
                  
                  tabPanel(
                      "Time Analysis",
-                     "Something here"
+                     tags$h2("Raw data"),
+                     tags$h3("Heatmap"),
+                     tags$p("Considering the raw data"),
+                     plotOutput("dataTS", width="100%"),
+                     tags$h3("Outliers"),
+                     sliderInput("std", "Select the deviation: ", 0, 5, 1.5, 0.1),
+                     plotlyOutput("outlierTS", width="100%"),
+                     tags$h2("Wavelet"),
+                     tags$p("As the raw data was sampled each 1h, level 1 represents 2h, level 2 = 4h, level 3 = 8h, and level 4 = 16h of data aggregation"),
+                     selectInput("WaveSignal", "Choose the coeffiecient: ",
+                                 choices = c("D1", "S1", "D2", "S2", "D3", "S3", "D4", "S4")),
+                     tags$h3("Heatmap"),
+                     plotOutput("heatWavelet", width="100%"),
+                     tags$h3("Anomalies - Wavelet"),
+                     plotOutput("anomaliesWavelet", width="100%")
+                     
                  ),
                  
                  tabPanel(

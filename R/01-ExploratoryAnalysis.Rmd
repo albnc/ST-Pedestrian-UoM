@@ -33,9 +33,9 @@ In this example was used only the year of 2019.
 
 ```{r load dataset}
 ## Filenames
-datafile = "../../data/Pedestrian_Counting_System___2009_to_Present__counts_per_hour_.csv"
-#datafile = "C:/Users/engan/GitHub/ST-Pedestrian-UoM/data/Pedestrian_Counting_System___2009_to_Present__counts_per_hour_.csv"
-posfile = "../../data/Pedestrian_Counting_System_-_Sensor_Locations.csv"
+datafile = "../data/rawsample2019.csv"
+#datafile = "../data/pedestrian_counts_2009-2019.csv"
+posfile = "../data/sensor_locations.csv"
   
 ## Upload CSV files
 csv.data <- read.csv(datafile, header = TRUE, sep = ",")
