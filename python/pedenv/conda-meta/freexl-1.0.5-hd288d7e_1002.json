@@ -1,0 +1,69 @@
+{
+  "build": "hd288d7e_1002",
+  "build_number": 1002,
+  "channel": "https://conda.anaconda.org/conda-forge/win-64",
+  "constrains": [],
+  "depends": [
+    "libiconv >=1.15,<1.17.0a0",
+    "vc 14.*"
+  ],
+  "extracted_package_dir": "C:\\Users\\engan\\AppData\\Local\\R-MINI~1\\pkgs\\freexl-1.0.5-hd288d7e_1002",
+  "features": "",
+  "files": [
+    "Library/bin/freexl.dll",
+    "Library/include/freexl.h",
+    "Library/lib/freexl.lib",
+    "Library/lib/freexl_i.lib",
+    ".nonadmin"
+  ],
+  "fn": "freexl-1.0.5-hd288d7e_1002.tar.bz2",
+  "license": "LGPL-2.1",
+  "link": {
+    "source": "C:\\Users\\engan\\AppData\\Local\\R-MINI~1\\pkgs\\freexl-1.0.5-hd288d7e_1002",
+    "type": 1
+  },
+  "md5": "c9e11cdc26ef446d4452be0a01d44080",
+  "name": "freexl",
+  "package_tarball_full_path": "C:\\Users\\engan\\AppData\\Local\\R-MINI~1\\pkgs\\freexl-1.0.5-hd288d7e_1002.tar.bz2",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "Library/bin/freexl.dll",
+        "path_type": "hardlink",
+        "sha256": "0a199d90849bf5b2534d3f6f55cc9a9e08bc5aac1404e2f7adb9c6d4c3ca5f2e",
+        "sha256_in_prefix": "0a199d90849bf5b2534d3f6f55cc9a9e08bc5aac1404e2f7adb9c6d4c3ca5f2e",
+        "size_in_bytes": 77312
+      },
+      {
+        "_path": "Library/include/freexl.h",
+        "path_type": "hardlink",
+        "sha256": "2ef344c11819d0a6925ec5ae3146f5b9dfae004a6ec8e3b0c77a9e20b4ad7a92",
+        "sha256_in_prefix": "2ef344c11819d0a6925ec5ae3146f5b9dfae004a6ec8e3b0c77a9e20b4ad7a92",
+        "size_in_bytes": 23704
+      },
+      {
+        "_path": "Library/lib/freexl.lib",
+        "path_type": "hardlink",
+        "sha256": "6df137c341959917c4c5cbc8b915fd149d8e3759008f1ec78d5c2e444a4bc37d",
+        "sha256_in_prefix": "6df137c341959917c4c5cbc8b915fd149d8e3759008f1ec78d5c2e444a4bc37d",
+        "size_in_bytes": 64660
+      },
+      {
+        "_path": "Library/lib/freexl_i.lib",
+        "path_type": "hardlink",
+        "sha256": "b1cc628e24f51e5848a7bef7805bd40b542e72beec4f8a2d944cda839fc9af2c",
+        "sha256_in_prefix": "b1cc628e24f51e5848a7bef7805bd40b542e72beec4f8a2d944cda839fc9af2c",
+        "size_in_bytes": 4216
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "None",
+  "sha256": "c92294844c111a79a77278ca7a1dc6dd31f25d0d6c3b3547aab170f60f5d2a7f",
+  "size": 57011,
+  "subdir": "win-64",
+  "timestamp": 1536235136375,
+  "track_features": "",
+  "url": "https://conda.anaconda.org/conda-forge/win-64/freexl-1.0.5-hd288d7e_1002.tar.bz2",
+  "version": "1.0.5"
+}

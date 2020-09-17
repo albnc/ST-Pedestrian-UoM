@@ -1,0 +1,49 @@
+{
+  "build": "14_mkl",
+  "build_number": 14,
+  "channel": "https://conda.anaconda.org/conda-forge/win-64",
+  "constrains": [
+    "liblapack 3.8.0 14_mkl",
+    "liblapacke 3.8.0 14_mkl",
+    "blas * mkl"
+  ],
+  "depends": [
+    "libblas 3.8.0 14_mkl"
+  ],
+  "extracted_package_dir": "C:\\Users\\engan\\AppData\\Local\\R-MINI~1\\pkgs\\libcblas-3.8.0-14_mkl",
+  "features": "",
+  "files": [
+    "Library/bin/libcblas.dll",
+    ".nonadmin"
+  ],
+  "fn": "libcblas-3.8.0-14_mkl.tar.bz2",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "link": {
+    "source": "C:\\Users\\engan\\AppData\\Local\\R-MINI~1\\pkgs\\libcblas-3.8.0-14_mkl",
+    "type": 1
+  },
+  "md5": "336dbde0d026002dfbe72a055041246c",
+  "name": "libcblas",
+  "package_tarball_full_path": "C:\\Users\\engan\\AppData\\Local\\R-MINI~1\\pkgs\\libcblas-3.8.0-14_mkl.tar.bz2",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "Library/bin/libcblas.dll",
+        "path_type": "hardlink",
+        "sha256": "937234ecbe1304ff8724bdb06b94b97111184a4673093585b61cda42d915f0ab",
+        "sha256_in_prefix": "937234ecbe1304ff8724bdb06b94b97111184a4673093585b61cda42d915f0ab",
+        "size_in_bytes": 15126400
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "None",
+  "sha256": "de663057bf78cc29bbdacd466aefe4c155cbd2224941583b46a01fe8207e7cfb",
+  "size": 3699955,
+  "subdir": "win-64",
+  "timestamp": 1571124443782,
+  "track_features": "",
+  "url": "https://conda.anaconda.org/conda-forge/win-64/libcblas-3.8.0-14_mkl.tar.bz2",
+  "version": "3.8.0"
+}

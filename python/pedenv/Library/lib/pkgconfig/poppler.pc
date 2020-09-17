@@ -1,0 +1,10 @@
+prefix=C:/Users/engan/GitHub/ST-Pedestrian-UoM/python/pedenv/Library
+libdir=C:/Users/engan/GitHub/ST-Pedestrian-UoM/python/pedenv/Library/lib
+includedir=C:/Users/engan/GitHub/ST-Pedestrian-UoM/python/pedenv/Library/include
+
+Name: poppler
+Description: PDF rendering library
+Version: 0.89.0
+
+Libs: -L${libdir} -lpoppler
+Cflags: -I${includedir}/poppler

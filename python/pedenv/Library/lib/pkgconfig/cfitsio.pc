@@ -1,0 +1,12 @@
+prefix=C:/Users/engan/GitHub/ST-Pedestrian-UoM/python/pedenv/Library
+exec_prefix=C:/Users/engan/GitHub/ST-Pedestrian-UoM/python/pedenv/Library
+libdir=
+includedir=C:/Users/engan/GitHub/ST-Pedestrian-UoM/python/pedenv/Library/include/
+
+Name: cfitsio
+Description: FITS File Subroutine Library
+URL: https://heasarc.gsfc.nasa.gov/fitsio/
+Version: .
+Libs: -L${libdir} 
+Libs.private: -lm
+Cflags: -I${includedir}

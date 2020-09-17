@@ -1,0 +1,41 @@
+      SUMMARY OF THE HDF4 CONFIGURATION
+      =================================
+
+General Information:
+-------------------
+                   HDF4 Version: 4.2.13
+                  Configured on: 2019-11-10
+                  Configured by: NMake Makefiles
+                 Configure mode: CMAKE 3.15.5
+                    Host system: Windows-10.0.14393
+              Uname information: Windows
+                      Libraries: 
+             Installation point: C:/Users/engan/GitHub/ST-Pedestrian-UoM/python/pedenv/Library
+
+Compiling Options:
+------------------
+               Compilation Mode: Release
+                     C Compiler: C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/amd64/cl.exe
+                         CFLAGS: -MD -GL  /DWIN32 /D_WINDOWS /W3
+                       CPPFLAGS: -MD -GL  /DWIN32 /D_WINDOWS /W3 /GR /EHsc
+               Shared Libraries: YES
+               Static Libraries: YES
+  Statically Linked Executables: 
+                        LDFLAGS: /machine:x64
+                Extra libraries: D:\bld\hdf4_1573404326047\_h_env\Library\lib\jpeg.lib;D:\bld\hdf4_1573404326047\_h_env\Library\lib\zlibstatic.lib
+                       Archiver: 
+                         Ranlib: 
+
+Languages:
+----------
+                        Fortran: NO
+               Fortran Compiler: 
+                  Fortran Flags: 
+
+                            JAVA: OFF
+                     JAVA Compiler:  
+
+Features:
+---------
+               SZIP compression: disabled
+   Support for netCDF API 2.3.2: NO

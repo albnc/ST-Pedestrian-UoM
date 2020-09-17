@@ -1,0 +1,60 @@
+{
+  "build": "he980bc4_0",
+  "build_number": 0,
+  "channel": "https://conda.anaconda.org/conda-forge/win-64",
+  "constrains": [],
+  "depends": [
+    "vc >=14,<15.0a0"
+  ],
+  "extracted_package_dir": "C:\\Users\\engan\\AppData\\Local\\R-MINI~1\\pkgs\\tbb-2020.1-he980bc4_0",
+  "features": "",
+  "files": [
+    "Library/bin/tbb.dll",
+    "Library/bin/tbbmalloc.dll",
+    "Library/bin/tbbmalloc_proxy.dll",
+    ".nonadmin"
+  ],
+  "fn": "tbb-2020.1-he980bc4_0.tar.bz2",
+  "license": "Apache 2.0",
+  "link": {
+    "source": "C:\\Users\\engan\\AppData\\Local\\R-MINI~1\\pkgs\\tbb-2020.1-he980bc4_0",
+    "type": 1
+  },
+  "md5": "fbe4f682940e4c7c27754660a9145656",
+  "name": "tbb",
+  "package_tarball_full_path": "C:\\Users\\engan\\AppData\\Local\\R-MINI~1\\pkgs\\tbb-2020.1-he980bc4_0.tar.bz2",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "Library/bin/tbb.dll",
+        "path_type": "hardlink",
+        "sha256": "7da63fee6e656faa89df82e7aa3284bfe57aa1ce5e2fe179d518d35894063ffa",
+        "sha256_in_prefix": "7da63fee6e656faa89df82e7aa3284bfe57aa1ce5e2fe179d518d35894063ffa",
+        "size_in_bytes": 278016
+      },
+      {
+        "_path": "Library/bin/tbbmalloc.dll",
+        "path_type": "hardlink",
+        "sha256": "929e57175a9b6146ebf10050a81f340ec2d57762df78c50c4dd8a38b28334d2e",
+        "sha256_in_prefix": "929e57175a9b6146ebf10050a81f340ec2d57762df78c50c4dd8a38b28334d2e",
+        "size_in_bytes": 125952
+      },
+      {
+        "_path": "Library/bin/tbbmalloc_proxy.dll",
+        "path_type": "hardlink",
+        "sha256": "97f405dedca7d6d0b305145f24d745d5d25ad4b4e2147e9682d42f270c9c35e2",
+        "sha256_in_prefix": "97f405dedca7d6d0b305145f24d745d5d25ad4b4e2147e9682d42f270c9c35e2",
+        "size_in_bytes": 36352
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "None",
+  "sha256": "f2e74b4a7a95803d723e69fa142e19ce70a9cc36572be92c9c12dda47a092295",
+  "size": 171426,
+  "subdir": "win-64",
+  "timestamp": 1583130098349,
+  "track_features": "",
+  "url": "https://conda.anaconda.org/conda-forge/win-64/tbb-2020.1-he980bc4_0.tar.bz2",
+  "version": "2020.1"
+}

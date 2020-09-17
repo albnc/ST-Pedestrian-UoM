@@ -1,0 +1,13 @@
+prefix=C:/Users/engan/GitHub/ST-Pedestrian-UoM/python/pedenv/Library
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+gmodule_supported=true
+
+Name: GModule
+Description: Dynamic module loader for GLib
+Version: 2.66.0
+Requires: glib-2.0
+Libs: -L${libdir} -lgmodule-2.0
+Libs.private: -L${libdir} -lintl
+Cflags: -I${includedir}

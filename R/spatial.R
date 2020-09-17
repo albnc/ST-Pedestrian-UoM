@@ -35,3 +35,18 @@ sf_to_tidygraph = function(x, directed = TRUE) {
   tbl_graph(nodes = nodes, edges = as_tibble(edges), directed = directed)
   
 }
+
+library(link2GI)
+library(rgrass7)
+library(osmdata)
+melba_streets <- opq(bbox=c(min(ped.data$long),min(ped.data$lat), 
+                            max(ped.data$long), max(ped.data$lat))) %>%
+  add_osm_feature(key="highway") %>% 
+  osmdata_sf() %>% 
+  `[[`("osm_lines")
+melba_streets <- select(melba_streets, osm_id)
+
+link <- findGRASS()
+link2GI::linkGRASS7(melba_streets, ver_select = TRUE)
+
+

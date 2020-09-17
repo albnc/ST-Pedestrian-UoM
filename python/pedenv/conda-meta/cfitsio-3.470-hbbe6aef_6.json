@@ -1,0 +1,175 @@
+{
+  "build": "hbbe6aef_6",
+  "build_number": 6,
+  "channel": "https://conda.anaconda.org/conda-forge/win-64",
+  "constrains": [],
+  "depends": [
+    "vc >=14.1,<15.0a0",
+    "vs2015_runtime >=14.16.27012"
+  ],
+  "extracted_package_dir": "C:\\Users\\engan\\AppData\\Local\\R-MINI~1\\pkgs\\cfitsio-3.470-hbbe6aef_6",
+  "features": "",
+  "files": [
+    "Library/bin/cfitsio.dll",
+    "Library/include/cfortran.h",
+    "Library/include/drvrgsiftp.h",
+    "Library/include/drvrsmem.h",
+    "Library/include/eval_defs.h",
+    "Library/include/eval_tab.h",
+    "Library/include/f77_wrap.h",
+    "Library/include/fitsio.h",
+    "Library/include/fitsio2.h",
+    "Library/include/fpack.h",
+    "Library/include/group.h",
+    "Library/include/grparser.h",
+    "Library/include/longnam.h",
+    "Library/include/region.h",
+    "Library/include/simplerng.h",
+    "Library/lib/cfitsio.lib",
+    "Library/lib/pkgconfig/cfitsio.pc",
+    ".nonadmin"
+  ],
+  "fn": "cfitsio-3.470-hbbe6aef_6.tar.bz2",
+  "license": "fitsio",
+  "link": {
+    "source": "C:\\Users\\engan\\AppData\\Local\\R-MINI~1\\pkgs\\cfitsio-3.470-hbbe6aef_6",
+    "type": 1
+  },
+  "md5": "b8d11a4aac86a0d61cf692c063b95c94",
+  "name": "cfitsio",
+  "package_tarball_full_path": "C:\\Users\\engan\\AppData\\Local\\R-MINI~1\\pkgs\\cfitsio-3.470-hbbe6aef_6.tar.bz2",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "Library/bin/cfitsio.dll",
+        "path_type": "hardlink",
+        "sha256": "b0245039a71af6cc84dd99ed54c3507670d4752fbe456929194c4672f4b99c0c",
+        "sha256_in_prefix": "b0245039a71af6cc84dd99ed54c3507670d4752fbe456929194c4672f4b99c0c",
+        "size_in_bytes": 1180672
+      },
+      {
+        "_path": "Library/include/cfortran.h",
+        "path_type": "hardlink",
+        "sha256": "fd0bca39101ebb91f2d9ef1067c0fc7d91eabf4b6bab167cda1ba0c77079be56",
+        "sha256_in_prefix": "fd0bca39101ebb91f2d9ef1067c0fc7d91eabf4b6bab167cda1ba0c77079be56",
+        "size_in_bytes": 135386
+      },
+      {
+        "_path": "Library/include/drvrgsiftp.h",
+        "path_type": "hardlink",
+        "sha256": "ffac6aedb65522e014203351c156363b5b91087db12a6421ac073d7371aa51ea",
+        "sha256_in_prefix": "ffac6aedb65522e014203351c156363b5b91087db12a6421ac073d7371aa51ea",
+        "size_in_bytes": 787
+      },
+      {
+        "_path": "Library/include/drvrsmem.h",
+        "path_type": "hardlink",
+        "sha256": "c7280cfe29e2c2c1a35d6b08a8c39dd802eb824c71917ef905063fae7881bcf2",
+        "sha256_in_prefix": "c7280cfe29e2c2c1a35d6b08a8c39dd802eb824c71917ef905063fae7881bcf2",
+        "size_in_bytes": 6536
+      },
+      {
+        "_path": "Library/include/eval_defs.h",
+        "path_type": "hardlink",
+        "sha256": "454167a2e5b9c924b7f9315c1763c052ed243ceb21d8a8ef4bb4b730c293fc5e",
+        "sha256_in_prefix": "454167a2e5b9c924b7f9315c1763c052ed243ceb21d8a8ef4bb4b730c293fc5e",
+        "size_in_bytes": 4254
+      },
+      {
+        "_path": "Library/include/eval_tab.h",
+        "path_type": "hardlink",
+        "sha256": "af9df06331fedc903b6b5b0ad7921505b6c51e80c7d453f9d2a4d5edf3fbb81b",
+        "sha256_in_prefix": "af9df06331fedc903b6b5b0ad7921505b6c51e80c7d453f9d2a4d5edf3fbb81b",
+        "size_in_bytes": 3547
+      },
+      {
+        "_path": "Library/include/f77_wrap.h",
+        "path_type": "hardlink",
+        "sha256": "a12b02aee13f7d70ebf941d8d9cbe620fa7f7c08d6977ac5830f152e56e1e3ee",
+        "sha256_in_prefix": "a12b02aee13f7d70ebf941d8d9cbe620fa7f7c08d6977ac5830f152e56e1e3ee",
+        "size_in_bytes": 10430
+      },
+      {
+        "_path": "Library/include/fitsio.h",
+        "path_type": "hardlink",
+        "sha256": "5d5f88edc38649e878566f5575b113ef4f7857bfeceb2e7632de50a6ea08b805",
+        "sha256_in_prefix": "5d5f88edc38649e878566f5575b113ef4f7857bfeceb2e7632de50a6ea08b805",
+        "size_in_bytes": 119089
+      },
+      {
+        "_path": "Library/include/fitsio2.h",
+        "path_type": "hardlink",
+        "sha256": "5be2969f863572a2e3f75239335231b4960a3c394e386515ff5dc6026b72cf1a",
+        "sha256_in_prefix": "5be2969f863572a2e3f75239335231b4960a3c394e386515ff5dc6026b72cf1a",
+        "size_in_bytes": 62930
+      },
+      {
+        "_path": "Library/include/fpack.h",
+        "path_type": "hardlink",
+        "sha256": "bbd6017b9b0b9d9df29a193ce93955a2dee03a28f8c726e1a91f49eb3d3844b1",
+        "sha256_in_prefix": "bbd6017b9b0b9d9df29a193ce93955a2dee03a28f8c726e1a91f49eb3d3844b1",
+        "size_in_bytes": 7155
+      },
+      {
+        "_path": "Library/include/group.h",
+        "path_type": "hardlink",
+        "sha256": "960a3e1a555e441e1ecb9eff5e8eb145e3d35ae7273c2878e19c590b68b22c58",
+        "sha256_in_prefix": "960a3e1a555e441e1ecb9eff5e8eb145e3d35ae7273c2878e19c590b68b22c58",
+        "size_in_bytes": 2097
+      },
+      {
+        "_path": "Library/include/grparser.h",
+        "path_type": "hardlink",
+        "sha256": "a46999df1e985b5763c642fd5f8d27e80e9435ddcb7b64e4f9b7104ad8bbcdda",
+        "sha256_in_prefix": "a46999df1e985b5763c642fd5f8d27e80e9435ddcb7b64e4f9b7104ad8bbcdda",
+        "size_in_bytes": 5725
+      },
+      {
+        "_path": "Library/include/longnam.h",
+        "path_type": "hardlink",
+        "sha256": "f8c18c44e68a4178f9f8c91e53ba5f101747002aa21221fc36eb13b93d8f3c7b",
+        "sha256_in_prefix": "f8c18c44e68a4178f9f8c91e53ba5f101747002aa21221fc36eb13b93d8f3c7b",
+        "size_in_bytes": 21749
+      },
+      {
+        "_path": "Library/include/region.h",
+        "path_type": "hardlink",
+        "sha256": "9ece17e2894e790567e061735600c7d79b401c03b2dcae6e29c1789ea496f178",
+        "sha256_in_prefix": "9ece17e2894e790567e061735600c7d79b401c03b2dcae6e29c1789ea496f178",
+        "size_in_bytes": 2157
+      },
+      {
+        "_path": "Library/include/simplerng.h",
+        "path_type": "hardlink",
+        "sha256": "6abe1ada40bd1006397fa96d9fa51f04de074d684872f825067f55b64ba3244e",
+        "sha256_in_prefix": "6abe1ada40bd1006397fa96d9fa51f04de074d684872f825067f55b64ba3244e",
+        "size_in_bytes": 1078
+      },
+      {
+        "_path": "Library/lib/cfitsio.lib",
+        "path_type": "hardlink",
+        "sha256": "df9c9deef3ef4755e84c8dc3023eea45706b9da5156ef71760ac2593ad6bde7f",
+        "sha256_in_prefix": "df9c9deef3ef4755e84c8dc3023eea45706b9da5156ef71760ac2593ad6bde7f",
+        "size_in_bytes": 109364
+      },
+      {
+        "_path": "Library/lib/pkgconfig/cfitsio.pc",
+        "file_mode": "text",
+        "path_type": "hardlink",
+        "prefix_placeholder": "D:/bld/cfitsio_1595512211472/_h_env",
+        "sha256": "585d7de02202406a274b0a44101e51c92c1248e5385a9bfa699b601f45a793df",
+        "sha256_in_prefix": "63a57a5aa8d37d321e0a3a307d8aa4c690b17a9dae1182177c0bba1671b9be1e",
+        "size_in_bytes": 363
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "None",
+  "sha256": "116e7fa1f3f41982485d17e99e2ec60c9dbae7c15c93ead51bca84c2cd9fbc67",
+  "size": 602435,
+  "subdir": "win-64",
+  "timestamp": 1595512572180,
+  "track_features": "",
+  "url": "https://conda.anaconda.org/conda-forge/win-64/cfitsio-3.470-hbbe6aef_6.tar.bz2",
+  "version": "3.470"
+}
