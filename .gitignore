@@ -2,5 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
+Pedestrian.pbix
 data/pedestrian_counts_2009-2019.csv
 find ./* -size +100M | cat >> .gitignore
