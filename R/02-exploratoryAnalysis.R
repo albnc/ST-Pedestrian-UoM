@@ -3,7 +3,7 @@ library(lubridate)
 library(waveslim)
 
 source("R/01-datafilter.R")
-## All the analysis are considering only the data from 2019
+## All the analysis are conparams$idering only the data from 2019
 
 # 1 - Temporal Analysis ---------------------------------------------------
 # Formatting dataset
@@ -11,8 +11,9 @@ sensors <- ped.year %>%
   select(sensorID, lat, long, count, datetime) %>% 
   mutate(year=year(datetime),
          month=month(datetime, label=TRUE, abbr=TRUE),
-         wday=weekdays(datetime, abbreviate=TRUE))
-sensors <- sensors %>%
+         wday=factor(weekdays(datetime, abbreviate=TRUE),labels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")),
+         hour=hour(datetime))
+sensors <-  sensors %>%
   group_by(sensorID, lat, long) %>% 
   nest()
 
@@ -31,7 +32,7 @@ ggplot(sensors$data[[13]], aes(x=month, y=count)) +
 
 ## Timelines
 p <- ggplot(sensors$data[[13]], 
-            aes(x=hour, y=count, group=date(datetime), color=date(datetime))) +
+            aes(x=hour, y=count, group=date(datetime), color=wday)) +
   geom_line()
 
 ## Timeline by months
@@ -43,28 +44,27 @@ p + facet_wrap(~wday)
 ## Timeline by month and weekdays
 p + facet_grid(rows=vars(month), col=vars(wday))
 
-## There are a pattern during weekdays, however some sensors registered some
-## anomalies on weekdays. Others present high variation in the first three 
-## months of the year. 
+## There are a pattern during weekdays, apparently Wednesday and Thursday are a different pattern from the other days of the week.
+## Some sensors registered some anomalies on weekdays. Others present high variation in the first three months of the year. 
 
 
 # 2 - Wavelet Analysis ----------------------------------------------------
 
 # What are the anomalies in one year? -------------------------------------
-
-sensors.wav <- sensors.full %>% 
+params$wav.level = 5 # Correspond to 32h
+sensors <- sensors %>% 
   mutate(
-  modwt = map(data, ~{mra(.x$count, wf="haar", J=5, method="modwt")})
+  modwt = map(data, ~{mra(.x$count, wf="haar", J=params$wav.level, method="modwt")})
 )
 
-sid <- 5
-y <- c(2019)
-idy <- sensors.wav$data[[sid]]$year %in% y
-dt <- sensors.wav$modwt[[sid]]$D3[idy]
-thresh <- sd(dt) * sqrt(2 * log(length(dt)))
-idt <- abs(dt) > thresh
+params$id <- 5
+params$level <- 'D2'
+coef.details <- sensors.wav$modwt[[params$id]][[params$level]]
+## Threshold global
+thresh <- sd(coef.details) * sqrt(2 * log(length(coef.details)))
+idt <- abs(coef.details) > thresh
 
-dt <- sensors.wav$data[[sid]] %>% filter(idy)
+dt <- sensors.wav$data[[params$id]]
 ggplot(dt, aes(x=datetime, y=count)) +
   geom_line(color="grey") +
   geom_point(data = dt %>%  filter(idt), color="red")
@@ -95,8 +95,10 @@ icons <- awesomeIcons(
   markerColor = getColor(sensors)
 )
 
-leaflet(data=sensors) %>% 
-  addAwesomeMarkers(lng=~longitude, lat=~latitude, label = ~sensorID, icon = icons) %>% 
+leaflet(data=ped.summary) %>% 
+  fitBounds(~min(long), ~min(lat), ~max(long), ~max(lat)) %>%
+  #addAwesomeMarkers(lng=~long, lat=~lat, label = ~sensorID, icon = icons) %>% 
+  addCircleMarkers(lng=~long, lat=~lat, radius = ~sqrt(count.avg)/3, label = ~sensorID) %>% 
   # addMarkers(lng=~longitude, lat=~latitude, label = ~sensorID, icon = icons) %>% 
   # addTiles()
   # addProviderTiles(providers$Stamen.Toner)
