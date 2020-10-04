@@ -56,16 +56,27 @@ shinyServer(function(input, output) {
     })
 
 # MAP ---------------------------------------------------------------------
-    # Sensors location on map
+    # Sensors location on map - STATIC PART
     output$mapSensors <- renderLeaflet({
         leaflet(ped.summary) %>% 
             #addAwesomeMarkers(lng=~long, lat=~lat, label=~sensorID) %>% 
-            addCircleMarkers(lng=~long, lat=~lat, radius=~sqrt(avg)/2,
-                             fillOpacity = 0.2, label=~content,
-                             color=~ifelse(sensorID==input$id, "red", "blue")) %>% 
+             addCircleMarkers(lng=~long, lat=~lat, radius=~sqrt(avg)/2, 
+                              fillOpacity = 0.2, label=~content,
+                              layerId = ~sensorID) %>%  
+                             # color=~ifelse(sensorID==input$id, "red", "blue")) %>%
             fitBounds(~min(long), ~min(lat), ~max(long), ~max(lat)) %>% 
             addProviderTiles(providers$CartoDB.Positron)
     })
+    
+    observe({
+        leafletProxy("mapSensors", data=ped.summary) %>% 
+            clearMarkers() %>% 
+            addCircleMarkers(lng=~long, lat=~lat, radius=~sqrt(avg)/2,
+                             fillOpacity = 0.2, label=~content,
+                             layerId = ~sensorID,
+                             color=~ifelse(sensorID==input$id, "red", "blue"))
+    })
+  
     
 
 # TIME ANALYSIS -----------------------------------------------------------
