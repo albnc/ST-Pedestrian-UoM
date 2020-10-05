@@ -22,8 +22,8 @@ pedata <- tibble(
   sensorID = db$Sensor_ID,
   sensorName = db$Sensor_Name,
   count = db$Hourly_Counts,
-  lat = db$latitude,
-  long = db$longitude
+  long = db$longitude,
+  lat = db$latitude
 ) %>% 
   mutate( datetime = make_datetime(
     year = db$Year,
@@ -72,7 +72,7 @@ ped.year %>% glimpse
 
 # Summary data ----------------------------------------------------------------------
 ped.summary <- ped.year %>% 
-  group_by(sensorID, lat, long) %>% 
+  group_by(sensorID, long, lat) %>% 
   summarise(count.tot=sum(count), count.avg=mean(count), count.std=sd(count), perc.year=n()/(24*yday(make_datetime(params$year, 12, 31))))
 ped.summary
 
