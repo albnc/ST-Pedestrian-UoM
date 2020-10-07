@@ -1,7 +1,9 @@
 library(waveslim)
 
 source("R/01-datafilter.R")
-## All the analysis are conparams$idering only the data from 2019
+## All the analysis are considering only the data from 2019
+
+params$sensor.id = 43
 
 # 1 - Temporal Analysis ---------------------------------------------------
 # Formatting dataset
@@ -23,13 +25,13 @@ ggplot(sensors$data[[1]], aes(x=datetime, y=count)) +
 ## Boxplot by month
 ## Boxplot doesn't tell any outlier, it is defined by the user using the deviation
 params$stdev <- 1.5 # standard deviation
-ggplot(sensors$data[[13]], aes(x=month, y=count)) + 
+ggplot(sensors$data[[41]], aes(x=month, y=count)) + 
   geom_boxplot(coef=params$stdev, outlier.color = "red", outlier.size = 1) +
   facet_wrap(~year)
 
 
 ## Timelines
-p <- ggplot(sensors$data[[13]], 
+p <- ggplot(sensors$data[[params$sensor.id]], 
             aes(x=hour, y=count, group=date(datetime), color=wday)) +
   geom_line()
 

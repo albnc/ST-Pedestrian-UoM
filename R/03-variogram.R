@@ -1,3 +1,4 @@
+library(sp)
 library(sf)     # Simple Feature -> Edzer Pebesma
 library(gstat)  # -> Edzer Pebesma, University of Munster, Germany
 library(geoR)   # -> Paulo Ribeiro Jr, Federal University of Parana (UFPR), Brazil
@@ -15,22 +16,25 @@ source("R/01-datafilter.R")
 ## [1] [Spatial Reference](https://spatialreference.org/ref/epsg/gda94-mga-zone-55/)
 ## [2] [Geocomputing with R](https://geocompr.robinlovelace.net/reproj-geo-data.html)
 
+# SIMPLE FEATURE (SF) ---------------------------------------------------------------
+## Created by Pebesma: [Simple Feature for R](https://r-spatial.github.io/sf/articles/sf1.html)
+## Used in most of packages to run variogram or spatial-temporal analysis
 ped.sf <- st_as_sf(ped.summary, coords = c("long", "lat"), crs=4326)
-## Check if it came as LongLat
+## Check if the data are in LongLat
 st_is_longlat(ped.sf)
 ped.sf$geometry
-# Plot standard
+## Plot standard
 plot(st_geometry(ped.sf), border='grey', axes=TRUE)
-# Plot GGPLOT2
+## Plot GGPLOT2
 ggplot() + geom_sf(data=ped.sf)
-# Plot LEAFLET - just works with WGS84 (CRS=4326)
+## Plot LEAFLET - just works with WGS84 (CRS=4326)
 leaflet(data=ped.sf) %>% 
   # addTiles() %>% 
   addProviderTiles(providers$CartoDB.Positron) %>% 
   addCircles(radius=~sqrt(count.avg)*2, color='green')
   
 
-# Change to the Australian CRS (projected points)
+## Change to the Australian CRS (projected points)
 ped.sf <- st_transform(ped.sf, crs=28355)
 st_is_longlat(ped.sf)
 ped.sf$geometry
@@ -43,19 +47,37 @@ ggplot() + geom_sf(data=ped.sf,
 ## There is a difference plotting both points with different CRS
 
 
-# Add X, Y coordinates to the dataframe ---------------------------------------------
-ped.summary %>% mutate(X=st_coordinates(ped.sf)[,1], Y=st_coordinates(ped.sf)[,2])
+# SPATIAL (SP) ----------------------------------------------------------------------
+wgs84 <- CRS("+proj=longlat +datum=WGS84")
+crs.vic <- CRS("+proj=tmerc +lat_0=0 +lon_0=145 +k=1 +x_0=500000 +y_0=10000000 +ellps=WGS84 +units=m +no_defs") 
+crs.aus <- CRS("+proj=tmerc +lat_0=0 +lon_0=145.9965556 +k=1.000006 +x_0=365616.076 +y_0=4495192.464 +ellps=aust_SA +units=m +no_defs")
+
+## Completely Manual
+ped.mat <- cbind(ped.summary$long, ped.summary$lat)
+row.names(ped.mat) <- 1:nrow(ped.mat)
+ped.sp0 <- SpatialPoints(ped.mat, wgs84)
+ped.sp0
+
+## Manual way
+ped.sp1 <- ped.summary
+coordinates(ped.sp1) <- ~long+lat
+proj4string(ped.sp1) <- wgs84
+summary(ped.sp1)
+
+## Easiest way
+ped.sp <- as_Spatial(ped.sf)
+summary(ped.sp)
 
 
 # PACKAGE GSTAT ---------------------------------------------------------------------
-## The variogram uses the classes sp or sf, that contains 'geometry' as the positions
+## The variogram uses the classes SP, that contains 'coords' with the positions
 ## Constant model ~1
-lzn.vgm <- variogram(log(zinc)~1, meuse)
-lzn.vgm
+ped.vgm <- variogram(log(count.tot)~coords.x1+coords.x2, ped.sp)
+ped.vgm
 
-lzn.fit = fit.variogram(lzn.vgm, model=vgm(1, "Sph", 900,1))
-lzn.fit
-plot(lzn.vgm, lzn.fit)
+ped.fit = fit.variogram(ped.vgm, model=vgm(1, "Exp", 900,1))
+ped.fit
+plot(ped.vgm, ped.fit)
 
 
 

@@ -63,17 +63,19 @@ pedata <- pedata %>%
 ## Filter year 2019
 params <- tibble(year = 2019) 
 ped.year <- pedata %>% 
+  select(sensorID, sensorName, count, long, lat, datetime) %>% 
   filter(year(datetime) == params$year) %>% 
   arrange(sensorID, datetime)
 
 rm(list=c("csv.data", "csv.pos", "db", "datafile", "posfile", "miss.data", "dt"))
-ped.year %>% glimpse
+#ped.year %>% glimpse
 
 
 # Summary data ----------------------------------------------------------------------
 ped.summary <- ped.year %>% 
   group_by(sensorID, long, lat) %>% 
-  summarise(count.tot=sum(count), count.avg=mean(count), count.std=sd(count), perc.year=n()/(24*yday(make_datetime(params$year, 12, 31))))
+  summarise(count.tot=sum(count), count.avg=mean(count), count.std=sd(count), perc.year=n()/(24*yday(make_datetime(params$year, 12, 31)))) %>% 
+  ungroup()
 ped.summary
 
 ## Plot missing data per sensor
