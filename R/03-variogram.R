@@ -39,7 +39,7 @@ leaflet(data=ped.sf) %>%
   
 
 ## Change to the Australian CRS (projected points)
-ped.sf <- st_transform(ped.sf, crs=28355)
+ped.sf <- st_transform(ped.sf, crs=st_crs(7899))
 st_is_longlat(ped.sf)
 ped.sf$geometry
 plot(st_geometry(ped.sf), border='grey', axes=TRUE)
@@ -70,7 +70,14 @@ coordinates(ped.sp) <- ~X+Y
 proj4string(ped.sp) <- wgs84
 ped.sp <- spTransform(ped.sp, crs.vic)
 summary(ped.sp)
+proj4string(ped.sp) <- as.character(NA)
 
+## Transfor with no projection *potencially* cause of errors in Kriging functio
+ped.sp <- as.data.frame(as_Spatial(ped.sf))
+ped.sp <- ped.sp %>% rename(X=coords.x1, Y=coords.x2)
+coordinates(ped.sp) <- ~X+Y
+# No projections
+proj4string(ped.sp)
 
 as(ped.sp, "data.frame") %>%
 ggplot(aes(X, Y, size=count.tot, color=count.tot)) +
@@ -81,15 +88,27 @@ ggplot(aes(X, Y, size=count.tot, color=count.tot)) +
 
 # Spatial Grid to feed models -------------------------------------------------------
 ## Create the grid to feed other points. Extract any intersection from OSMDATA
-X <- seq(from=min(ped.sp$X),to=max(ped.sp$X), by=100)
-Y <- seq(from=min(ped.sp$Y),to=max(ped.sp$Y), by=100)
+x.range <- as.integer(range(ped.sp$X))
+y.range <- as.integer(range(ped.sp$Y))
+X <- seq(from=x.range[1],to=x.range[2], by=100)
+Y <- seq(from=y.range[1],to=y.range[2], by=100)
+#coords.df <- expand.grid(X,Y)
 coords.df <- crossing(X,Y)
 ## Transform in SP class
 coordinates(coords.df) <- ~X+Y
-proj4string(coords.df) <- crs.vic
+proj4string(coords.df) <- proj4string(ped.sp)
+# gridded(coords.df) <- TRUE
 
-# Inverse distance
-ped.idw <- idw(count.tot~1, idp=2.0, ped.sp, coords.df)
+## Plot the grid and known points
+ggplot() +
+  geom_point(data = as.data.frame(coords.df), aes(X,Y), shape=3) +
+  geom_point(data = as.data.frame(ped.sp), aes(X,Y, color = "red", size = .5)) + coord_equal()
+
+## Inverse distance
+ped.idw <- idw(formula = count.tot~1, 
+               idp = 2.0, 
+               locations = ped.sp, 
+               newdata = coords.df)
 
 ggplot() +
   geom_tile(data=as.data.frame(ped.idw), aes(x=X,y=Y, fill=var1.pred)) +
@@ -110,19 +129,26 @@ func.variogram <- function(data, model="Sph", alpha=0, tol=45) {
   return(plot(ped.vgm, ped.fit))
 }
 # Models for one direction and angle
-func.variogram(data=ped.sp, model="Sph", alpha=45, tol=45)
+func.variogram(data=ped.sp, model="Gau", alpha=45, tol=45)
 
 # Models for more than one direction and angle
-func.variogram(data=ped.sp, model="Sph", alpha=c(0,45,90,135), tol=22.5)
+func.variogram(data=ped.sp, model="Gau", alpha=c(0,45,90,135), tol=22.5)
 
   
 # Kriging gstat ---------------------------------------------------------------------
-ped.krige <- krige(formula = count.tot~X+Y,
-                   data = ped.sp,
+# Using anisotropic model
+ped.vm.ani <- vgm(ped.fit$psill, ped.fit$model, ped.fit$range, nugget = 0, anis = c(90,100))
+ped.krige <- krige(formula = count.tot~1,
+                   locations = ped.sp,
                    newdata = coords.df,
-                   model = ped.fit)
+                   model = ped.vm.ani)
 
-
+ggplot() +
+  geom_tile(data=as.data.frame(ped.krige), aes(x=X,y=Y, fill=var1.pred)) +
+  geom_point(data=as.data.frame(ped.sp), aes(x=X, y=Y)) +
+  coord_equal() +
+  scale_fill_gradientn(colors=terrain.colors(10)) +
+  theme_bw()
 
 
 
