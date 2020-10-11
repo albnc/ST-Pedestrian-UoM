@@ -8,7 +8,9 @@ library(RColorBrewer) # color palettes
 
 
 # LOAD DATASET ----------------------------------------------------------------------
-source("R/01-datafilter.R")
+# source("R/01-datafilter.R")
+ped.year <- readRDS("data/pedyear.RDS")
+ped.summary <- readRDS("data/pedsummary.RDS")
 
 # Is it necessary to transform (Long,Lat) in (X,Y)? ---------------------------------
 ## It is necessary to understand CRS (Coordinate Reference System). There are a lot of different CRS, for each region in the world. 
@@ -119,7 +121,7 @@ ggplot() +
 
 # Variogram gstat -------------------------------------------------------------------
 func.variogram <- function(data, model="Sph", alpha=0, tol=45) {
-  ped.vgm <<- variogram(log(count.tot)~X+Y, data, cutoff = 2000, width=100, alpha=alpha, tol.hor=tol, cressie=TRUE)
+  ped.vgm <<- variogram(log(count.tot)~X+Y, data, cutoff = 2000, width=100, alpha=alpha, tol.hor=tol, cressie=FALSE)
   print(ped.vgm)
   
   ## There are four models to calibrate the variogram: Sph, Exp, Gau, Mat
@@ -129,7 +131,7 @@ func.variogram <- function(data, model="Sph", alpha=0, tol=45) {
   return(plot(ped.vgm, ped.fit))
 }
 # Models for one direction and angle
-func.variogram(data=ped.sp, model="Gau", alpha=45, tol=45)
+func.variogram(data=ped.sp, model="Gau", alpha=0, tol=22.5)
 
 # Models for more than one direction and angle
 func.variogram(data=ped.sp, model="Gau", alpha=c(0,45,90,135), tol=22.5)
@@ -161,10 +163,19 @@ ggplot() +
 
 # PACKAGE GEOR (UFPR) ---------------------------------------------------------------
 ## The variogram run using the class 'geodata' that contains two lists: coords and data
-ped <- as.geodata(ped.summary, coords.col = 2:3, data.col = 4 )
-summary(ped)
-plot.geodata(ped, col.data = 1)
-points(ped, col.data = 1, xlab="Longitude", ylab="Latitude", pt.divide = "quartiles")
+ped.geo <- as.geodata(as.data.frame(ped.sp), coords.col = 6:7, data.col = 2 )
+summary(ped.geo)
+plot.geodata(ped.geo, col.data = 1)
+points(ped.geo, col.data = 1, xlab="X", ylab="Y", pt.divide = "quartiles")
 
-cloud1 <- variog(ped, option="cloud")
+cloud1 <- variog(ped.geo, option="cloud", max.dist = 2400)
 plot(cloud1)
+
+bin1 <- variog(ped.geo, uvec = seq(0,2400,100), direction = 3*pi/4,
+               estimator.type = "modulus")#, bin.cloud = T)
+plot(bin1)#, bin.cloud=T)
+
+vario.4 <- variog4(ped.geo, max.dist = 2400)
+plot(vario.4, omni = TRUE)
+
+xv.ml <- xvalid(ped.geo, model = ml)

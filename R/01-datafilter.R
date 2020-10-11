@@ -70,6 +70,7 @@ ped.year <- pedata %>%
 rm(list=c("csv.data", "csv.pos", "db", "datafile", "posfile", "miss.data", "dt"))
 #ped.year %>% glimpse
 
+saveRDS(ped.year, "data/pedyear.RDS")
 
 # Summary data ----------------------------------------------------------------------
 ped.summary <- ped.year %>% 
@@ -77,6 +78,8 @@ ped.summary <- ped.year %>%
   summarise(count.tot=sum(count), count.avg=mean(count), count.std=sd(count), perc.year=n()/(24*yday(make_datetime(params$year, 12, 31)))) %>% 
   ungroup()
 ped.summary
+
+saveRDS(ped.summary, "data/pedsummary.RDS")
 
 ## Plot missing data per sensor
 ped.summary %>% arrange(perc.year)

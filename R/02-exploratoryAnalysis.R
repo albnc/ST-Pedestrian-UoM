@@ -1,6 +1,8 @@
 library(waveslim)
 
-source("R/01-datafilter.R")
+ped.year <- readRDS("data/pedyear.RDS")
+ped.summary <- readRDS("data/pedsummary.RDS")
+#source("R/01-datafilter.R")
 ## All the analysis are considering only the data from 2019
 
 params$sensor.id = 43
@@ -11,7 +13,7 @@ sensors <- ped.year %>%
   select(sensorID, lat, long, count, datetime) %>% 
   mutate(year=year(datetime),
          month=month(datetime, label=TRUE, abbr=TRUE),
-         wday=factor(weekdays(datetime, abbreviate=TRUE),labels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")),
+         wday=factor(weekdays(datetime, abbreviate=TRUE),levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")),
          hour=hour(datetime))
 sensors <-  sensors %>%
   group_by(sensorID, lat, long) %>% 
