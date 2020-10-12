@@ -4,7 +4,7 @@ author: "Andre Luiz Cunha"
 date: "`r Sys.Date()`"
 output:
     html_document:
-    number_section : true
+      number_section : true
 
 params:
   year : 2019
@@ -18,8 +18,11 @@ library(dplyr)
 library(tidyr)
 library(leaflet)
 library(gstat)
+library(sf)
+library(sp)
+library(osmdata)
 
-knitr::opts_chunk$set(fig.width = 12, fig.height = 8, fig.path = "Figs/",
+knitr::opts_chunk$set(fig.width = 10, fig.height = 6, fig.path = "Figs/",
                       echo = TRUE)
 ```
 
@@ -73,7 +76,7 @@ I figured out that the "factor" level was wrong for the weekday variables.
 
 ```{r weekdays}
 ## Plot base
-p <- ggplot(sensors %>% filter(sensorID == 40), 
+p <- ggplot(sensors %>% filter(sensorID == 1), 
             aes(x=hour, y=count, group=date(datetime), color=wday)) +
   geom_line()
 
@@ -114,18 +117,109 @@ ggplot(night.before, aes(x=count.avg)) +
   facet_wrap(~wday)
   
 ```
-# Spatial Analysis
-
-## Variogram
-
-```{r variogram}
+```{r chi-test}
 hist.event <- hist(night.event$count, breaks = seq(0,12000,by=500))
 hist.4weeks <- hist(night.before$count.avg, breaks = seq(0,12000,by=500))
 chisq.test(hist.event$counts, hist.4weeks$counts)
 ```
 
-## Kriging
-```{r kriging}
 
+# Spatial Analysis
+The packages [gstat](https://cran.r-project.org/web/packages/gstat/index.html) and [geoR](https://cran.r-project.org/web/packages/geoR/index.html) both compute the variogram in R. The gstat also considers spatio-temporal data.
+
+Some useful tutorials:
+- [brief tutorial in gstat](https://cran.r-project.org/web/packages/gstat/vignettes/gstat.pdf)
+- [spatio-temporal geostatistics using gstat](https://cran.r-project.org/web/packages/gstat/vignettes/spatio-temporal-kriging.pdf)
+- [notebook tutorial using gstat](https://github.com/GeostatsGuy/geostatsr/blob/master/kriging_demo_Rnotebook.ipynb)
+- [tutorial in geoR](http://www.leg.ufpr.br/geoR/#introduction)
+
+## Spatial dataset
+```{r spatial-data, message=FALSE, warning=FALSE}
+## Transform in spatial object (SP)
+ped.sp <- ped.summary %>% rename(X=long, Y=lat)
+## Attribute coordinates
+coordinates(ped.sp) <- ~X+Y
+## Attribute the projection WGS84 (4326)
+proj4string(ped.sp) <- CRS("+init=epsg:4326")
+## Convert to Australian projection
+ped.sp <- spTransform(ped.sp, CRS("+init=epsg:7899"))
+proj4string(ped.sp) <- as.character(NA)
+
+## Spatial grid to feed kriging
+x.range <- as.integer(range(ped.sp$X))
+y.range <- as.integer(range(ped.sp$Y))
+X <- seq(from=x.range[1]-100,to=x.range[2]+100, by=100)
+Y <- seq(from=y.range[1]-100,to=y.range[2]+100, by=100)
+coords.df <- crossing(X,Y)
+## Transform it in SP class
+coordinates(coords.df) <- ~X+Y
+#proj4string(coords.df) <- proj4string(ped.sp)
+
+## Plot the grid and known points
+ggplot() +
+  geom_point(data = as.data.frame(coords.df), aes(X,Y), shape=3) +
+  geom_point(data = as.data.frame(ped.sp), aes(X,Y, color = "red", size = .5)) + coord_equal()
+```
+## Network data
+```{r osmdata}
+
+```
+
+## Inverse Distance
+The very simple spatial estimation method:
+$$ z^*(\bf{u}_{0}) = \sum^{n}_{\alpha=1} \frac{1}{d^{p}} z(\bf{u}_{\alpha}) $$
+
+```{r invdist, warning=FALSE}
+ped.idw <- idw(formula = count.avg~1, 
+               idp = 1.0, 
+               locations = ped.sp, 
+               newdata = coords.df)
+
+ggplot() +
+  geom_tile(data=as.data.frame(ped.idw), aes(x=X,y=Y, fill=var1.pred)) +
+  geom_point(data=as.data.frame(ped.sp), aes(x=X, y=Y)) +
+  coord_equal() +
+  scale_fill_gradientn(colors=terrain.colors(10)) +
+  theme_bw()
+```
+
+
+
+## Variogram
+
+```{r variogram}
+ped.vgm <- variogram(log(count.avg)~sqrt(X^2+Y^2), ped.sp, cutoff = 2400, width=100, alpha=c(0, 45, 90, 135), tol.hor=22.5, cressie=FALSE)
+#print(ped.vgm)
+  
+## There are four models to calibrate the variogram: Sph, Exp, Gau, Mat
+## The parameters psill, range and nugget will be estimated. It is a good practice to set up a guess. If there are no guesses, use NA in each parameter.
+ped.fit <-fit.variogram(ped.vgm, model=vgm(psill = 1, model = "Exp", range = 100))
+print(ped.fit)
+plot(ped.vgm, ped.fit)
+```
+## Spatio-Temporal Variogram
+```{r variogramST}
+
+```
+
+
+## Kriging
+
+```{r kriging}
+# Create any model to predict the values
+#ped.vm.ani <- vgm(psill=1, model="Gau", range=100, nugget = 0, anis = c(0,.25))
+ped.fit <-fit.variogram(ped.vgm, model=vgm(psill = 1, model = "Exp", range = 100))
+plot(ped.vgm, ped.fit)
+ped.krige <- krige(formula = count.avg~sqrt(X^2+Y^2),
+                   locations = ped.sp,
+                   newdata = coords.df,
+                   model = ped.fit)
+
+ggplot() +
+  geom_tile(data=as.data.frame(ped.krige), aes(x=X,y=Y, fill=var1.pred)) +
+  geom_point(data=as.data.frame(ped.sp), aes(x=X, y=Y)) +
+  coord_equal() +
+  scale_fill_gradientn(colors=terrain.colors(10)) +
+  theme_bw()
 ```
 
