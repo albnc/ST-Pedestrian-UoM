@@ -62,7 +62,9 @@ sensors <- ped.year %>%
 
 night.event <- sensors %>% filter(datetime >= "2019-08-22" & datetime < "2019-08-25")
 
-night.before <- sensors %>% filter(datetime >= ymd("2019-08-22") - weeks(4) & datetime < "2019-08-22" & wday %in% c("Thu", "Fri", "Sat")) %>% 
+night.before <- sensors %>% 
+  filter(datetime >= ymd("2019-08-22") - weeks(4) & datetime < "2019-08-22" &
+           wday %in% c("Thu", "Fri", "Sat")) %>% 
   group_by(sensorID, wday, hour) %>% 
   summarise(count.avg=mean(count))
 
@@ -162,6 +164,30 @@ ggplot() +
 ```
 ## Network data
 ```{r osmdata}
+## Get Melbourne bounding box
+lat.range <- range(ped.summary$lat)
+lng.range <- range(ped.summary$long)
+box <- c(lng.range[1],lat.range[1], lng.range[2], lat.range[2])
+# box <- getbb("central Melbourne")
+q <- opq(bbox=box) %>% 
+  add_osm_feature(key='highway',
+                  value=c('motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential', 'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link')) %>%
+  osmdata_sf()
+
+ggplot() +
+  geom_sf(data = q$osm_lines,
+          inherit.aes = FALSE,
+          color = "black",
+          size = .4,
+          alpha = .8)
+
+
+## Real points to feed the variogram/krige
+melba.sp <- q$osm_points$geometry
+melba.sp <- st_transform(melba.sp, crs=CRS("+init=epsg:7899")) %>% 
+  as_Spatial() %>% as.data.frame() %>% rename(X=coords.x1, Y=coords.x2)
+coordinates(melba.sp) <- ~X+Y
+# proj4string(melba.sp) <- as.character(NA)
 
 ```
 
@@ -171,8 +197,9 @@ $$ z^*(\bf{u}_{0}) = \sum^{n}_{\alpha=1} \frac{1}{d^{p}} z(\bf{u}_{\alpha}) $$
 
 ```{r invdist, warning=FALSE}
 ped.idw <- idw(formula = count.avg~1, 
-               idp = 1.0, 
+               idp = 2.0, 
                locations = ped.sp, 
+               # newdata = melba.sp)
                newdata = coords.df)
 
 ggplot() +
