@@ -130,6 +130,7 @@ chisq.test(hist.event$counts, hist.4weeks$counts)
 The packages [gstat](https://cran.r-project.org/web/packages/gstat/index.html) and [geoR](https://cran.r-project.org/web/packages/geoR/index.html) both compute the variogram in R. The gstat also considers spatio-temporal data.
 
 Some useful tutorials:
+
 - [brief tutorial in gstat](https://cran.r-project.org/web/packages/gstat/vignettes/gstat.pdf)
 - [spatio-temporal geostatistics using gstat](https://cran.r-project.org/web/packages/gstat/vignettes/spatio-temporal-kriging.pdf)
 - [notebook tutorial using gstat](https://github.com/GeostatsGuy/geostatsr/blob/master/kriging_demo_Rnotebook.ipynb)
@@ -159,8 +160,10 @@ coordinates(coords.df) <- ~X+Y
 
 ## Plot the grid and known points
 ggplot() +
-  geom_point(data = as.data.frame(coords.df), aes(X,Y), shape=3) +
-  geom_point(data = as.data.frame(ped.sp), aes(X,Y, color = "red", size = .5)) + coord_equal()
+  geom_point(data = as.data.frame(coords.df), aes(X,Y, color="grid"), shape=3) +
+  geom_point(data = as.data.frame(ped.sp), aes(X,Y, color="known"), size=3) +
+  scale_color_manual(name="", values=c("black", "red")) +
+  coord_equal()
 ```
 ## Network data
 ```{r osmdata}
