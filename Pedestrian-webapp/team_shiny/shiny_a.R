@@ -8,6 +8,7 @@ library(tidyverse)
 library(lubridate)
 library(sf)
 library(shiny)
+library(leaflet)
 
 # Data ----
 # Basemap Lines
@@ -17,34 +18,40 @@ map_rail <- readRDS("maprail.rds")
 
 # Sensors Locations
 sensorloc <- readRDS("sensorloc.rds")
+sensor_sf <- st_as_sf(sensorloc, coords = c("Longitude", "Latitude"), crs=4326)
 
 # Events List with Temporal Spans
-events <- readRDS("events2019.rds")
+### events <- readRDS("events2019.rds")
+events <- readRDS("events2019_a.rds")
 
 # Pedestrian Counts, Wavelet Transformed Data, Before-and-After
 before_after <- readRDS("beforeafter.rds")
 
 # All identified outliers (Levels 1 to 5) for events and sensor no.
-outlier_sensors <- readRDS("outliersensors.rds")
+outlier_sensors <- readRDS("outliersensors_a.rds")
+###outlier_sensors <- readRDS("outliersensors.rds")
 
 # Hour-by-hour identified outliers
-outlier_hour <- readRDS("outlierhours.rds")
+outlier_hour <- readRDS("outlierhours_a.rds")
+###outlier_hour <- readRDS("outlierhours.rds")
 
 
 # Define UI ----
 ui <- fluidPage(
   titlePanel(
     "Measuring the Temporal and Spatial Impacts of Short-term Events on Pedestrian Flows"
-  ),
+    ),
   sidebarLayout(
     sidebarPanel(
       h4("Events 2019"),
       helpText("Event-specific results: all events occured in and around Melbourne City in 2019"),
       selectInput("chosen_event",
                   label = "Choose Event",
-                  choices = unique(events$EventString),
-                  selected = "White Night Melbourne Night 3 - Aug 24 19:00 to Aug 25 02:00"
-      ),
+                  choices = setNames(events$Event_ID,events$EventString),
+                  selected = 194
+                  ### choices = unique(events$EventString),
+                  ### selected = "White Night Melbourne Night 3 - Aug 24 19:00 to Aug 25 02:00"
+                  ),
       # uiOutput("chosen_date"),
       strong("Event Information"),
       textOutput("chosen_event_schedule"),
@@ -67,86 +74,76 @@ ui <- fluidPage(
     mainPanel(
       tabsetPanel(
         tabPanel("Event Results",
-                 p("Our project explores the ", a("data", href = "https://data.melbourne.vic.gov.au/Transport/Pedestrian-Counting-System-2009-to-Present-counts-/b2ak-trbp/data"), " collected by the pedestrian counting sensors installed around the City of Melbourne. We use this data to first detect when and where events such as public holidays and festivals have a major effect. We then identify how long this lasts and how the event spreads to estimate the overall increase/decrease in pedestrians across the network. These historical event results can be used to inform future event and city planning activities."),
                  h3("Location and Temporal Span of Event Effect"),
                  fluidRow(
                    splitLayout(cellWidths = c("40%", "60%"),
-                               plotOutput("plot_outliers", width = "100%"),
+                               leafletOutput("plot_outliers", width = "100%"),
+                               # plotOutput("plot_outliers", width = "100%"),
                                plotOutput("plot_temporal", width = "100%")
                    )
                  ),
-                 fluidRow(
-                   splitLayout(cellWidths = c("40%", "60%"),
-                               em(textOutput("outliersdetected"), align = "center"),
-                               em(textOutput("temporalspan"), align = "center")
-                   )
-                 ),
-                 br(),
                  p("Outliers were detected in pedestrian counting sensors using a multi-resolution wavelet analysis. The duration of event effect on the network was estimated from the outliers detected."),
+                 # p("Outliers were detected in pedestrian counting sensors using a multi-resolution wavelet analysis."),
+                 # h3("Temporal Span of Event Effect"),
+                 # p("The duration of event effect on the network can be estimated from the level at which outliers across all sensors were detected in the pedestrian counting data."),
                  h3("Scale of Event Effect"),
                  fluidRow(
                    splitLayout(cellWidths = c("40%", "60%"), 
+                               height = "500px", 
                                plotOutput("plot_cluster"),
                                plotOutput("plot_scale")
-                   )),
-                 br(),
-                 p("A before-and-after analysis was used to compare pedestrian counts during the event to its 4-week historical average. Sensors within the same clusters experienced similar increases/decreases in pedestrian flows throughout the event's temporal span."),
-                 br(),
+                 )),
+                 p("Before-and-after comparison of pedestrian counts during event to 4-week historical average. Sensors within the same clusters experienced similar increases/decreases in pedestrian flows throughout the event's temporal span."),
                  radioButtons("ncluster",
                               label = "Choose no. of clusters for plots above",
                               choices = c(1:5),
                               selected = 3,
                               inline = TRUE
+                              )
                  ),
-                 strong("Summary of the average increase/decrease in pedestrian flows experienced by sensors within the same cluster across each hour of the event's temporal span"),
-                 dataTableOutput("clustersummary")
-        ),
+        ## PANEL 2
         tabPanel("Pedestrian Sensor Information",
                  h3("About Melbourne City's Pedestrian Counting Sensors", align = "left"),
                  p("Pedestrian volumes are collected from a network of pedestrian counting sensors installed across the City of Melbourne."),
                  p("Data has been uploaded since 2009 every 15 to 20 minutes by sensors and is stored hourly, 24 hours a day. 18 sensors were initially installed in 2009, with additional sensors fitted over the years bringing the total number of installed sensors to 66 in June 2020."),
-                 p("The City of Melbourne's Pedestrian Counting System Visualisation is available ", a("here.", href = "http://www.pedestrian.melbourne.vic.gov.au/")),
                  img(src = "Melbourne_City.png", width = "100%"),
                  em("Figure: Melbourne City Pedestrian Counting Sensors and Places of Interest"),
                  br()
-        ), 
+                 ), 
         tabPanel("Project Summary",
                  h3("Project Information"),
                  strong("Project Team"),
                  p("Jessica Tong, Hans Gao, and Marcus Rzanovski"), 
                  strong("Project Supervisors"),
-                 p("Patricia Sauri Lavieri and Andre Barbosa Nunes da Cunha"),
+                 p("Patricia Sauri Lavieri and Andre Barbosa Nunes Da Cunha"),
                  em("Department of Infrastructure Engineering, The University of Melbourne"),
                  br(),
                  br(),
                  p("This app is part of our final-year Capstone Project for the Master of Engineering."),
-                 p("The main results from our research are summarised in the 'Event Results' tab, where you can choose to view a specific event from a list of approximately 200 events. The events we have investigated are all from 2019 and occurred in and around Melbourne City. These results are drawn from an analysis of Melbourne City's Pedestrian Counting Sensors (see 'Pedestrian Sensor Information' tab for more information)."),
-                 br(),
+                 p("The main results from our research are summarised in the 'Event Results' tab, where you can choose to view a specific event from a list of approximately 200 events from 2019 that occurred in and around Melbourne City that we have investigated. These results are drawn from an analysis of Melbourne City's Pedestrian Counting Sensors (see 'Pedestrian Sensor Information' tab for more information)."),
+                 hr(),
+                 # br(),
                  h4("Project Objectives"),
                  p("- Estimate how long an event lasts and the areas affected in a pedestrian network"),
                  p("- Detect anomalies in pedestrian counting sensors and map locations of outliers that occur during an event"),
                  p("- Use outliers detected during an event to estimate the event's temporal span of effect (how long the event lasts within the network)"),
-                 p("- Determine the scale of event effect (increase/decrease in the number of pedestrians)"),
-                 br(),
+                 p("- Determine the scale of event effect (increase/decreasee in the number of pedestrians)"),
+                 hr(),
+                 # br(),
                  h4("Project Outcomes"),
                  p("- 250 events investigated, with results shown for approximately 200 events"),
                  p("- Methods used could be extended to automatically detect future events, or to look at other historical events"),
                  p("- These results provide an overview of event effects that could be used to inform future city and event planning activities"),
                  br()
-        ),
-        tabPanel("Project Poster",
-                 h3("Endeavour Exhibition 2020 Project Poster"),
-                 img(src = "Endeavour_poster.png", width = "100%"),
-                 br()
+                 )
         )
       )
     )
-  )
 )
 
 # Define server logic ----
 server <- function(input, output) {
-  
+
   # Event Start Date-Time Input Selection
   # output$chosen_date <- renderUI({
   #   selectInput("chosen_date",
@@ -155,11 +152,12 @@ server <- function(input, output) {
   #               )
   #   })
   
-  
+
   # Event Name and Start Date for Filtering
   eventfilter <- reactive({
-    tibble("EventString" = input$chosen_event) %>% 
-      left_join(events, by = c("EventString"))
+    events %>% filter(Event_ID == input$chosen_event)
+    ### tibble("EventString" = input$chosen_event) %>%
+    ###   left_join(events, by = c("EventString"))
   })
   
   # Print Event Information
@@ -193,117 +191,130 @@ server <- function(input, output) {
   # Daily Comparison Plot
   output$plot_dailycomparison <- renderPlot({
     before_after %>%
-      select(Sensor_ID, Date_Time, Event, 'Pedestrian Counts' = Hourly_Counts, '4-week Historical Average' = Avg4w, Event_Date_Time_Start, Event_Date_Time_End, StartEvent, EndEvent, Event2) %>%
-      filter(date(Date_Time) >= date(eventfilter()$Event_Date_Time_Start[1]) & date(Date_Time) <= date(eventfilter()$Event_Date_Time_End[1])) %>%
-      pivot_longer(cols = c("Pedestrian Counts", "4-week Historical Average"), names_to = "Type", values_to = "Count") %>%
-      ggplot(aes(x = Date_Time)) +
-      geom_rect(data = ~group_by(.x, Event2),
-                aes(xmin = StartEvent, xmax = EndEvent,
-                    ymin = min(Count), ymax = max(Count), fill = "event"), na.rm = TRUE) +
-      scale_fill_manual(name = NULL, values = "grey", labels = "Scheduled Event") +
-      ggrepel::geom_text_repel(data = ~filter(.x, Type == "4-week Historical Average") %>%
-                                 mutate(EventStrips = str_wrap(Event2, 10)) %>%
-                                 group_by(EventStrips, StartEvent) %>%
-                                 slice(1) %>%
-                                 ungroup(),
-                               aes(x = StartEvent + (EndEvent - StartEvent)/2, label = EventStrips),
-                               y = Inf,
-                               na.rm = TRUE,
-                               direction = "y",
-                               min.segment.length = 100,
-                               size = 2
-      ) +
-      geom_line(aes(y = Count, group = Sensor_ID, color = Type)) +
-      facet_wrap(vars(Type), ncol = 1, nrow = 2) +
-      scale_y_continuous(labels = scales::label_comma(), breaks = scales::breaks_extended(6), expand = c(0,0)) +
-      scale_x_datetime(date_breaks = "6 hours", labels = scales::label_time(format = "%d %b\n %H:%M"), expand = c(0,0)) +
-      labs(x = NULL, y = "No. of Pedestrians", color = "All Sensors", fill = "Schedulded Event") +
-      theme_minimal() +
-      guides(colour = guide_legend(nrow = 2, title.position = "left", byrow = FALSE)) +
-      theme(panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.line.y =  element_line(),
-            axis.ticks.y = element_line(),
-            axis.line.x =  element_line(),
-            axis.ticks.x = element_line(),
-            strip.text.x = element_blank(),
-            legend.position = "top",
-            legend.box.just = "center"
-      )
+    select(Sensor_ID, Date_Time, Event, 'Actual Pedestrian Count' = Hourly_Counts, '4-week Historical Average' = Avg4w, Event_Date_Time_Start, Event_Date_Time_End, StartEvent, EndEvent, Event2) %>%
+    filter(date(Date_Time) >= date(eventfilter()$Event_Date_Time_Start[1]) & date(Date_Time) <= date(eventfilter()$Event_Date_Time_End[1])) %>%
+    pivot_longer(cols = c("Actual Pedestrian Count", "4-week Historical Average"), names_to = "Type", values_to = "Count") %>%
+    ggplot(aes(x = Date_Time)) +
+    geom_rect(data = ~group_by(.x, Event2),
+              aes(xmin = StartEvent, xmax = EndEvent,
+                  ymin = min(Count), ymax = max(Count), fill = "event"), na.rm = TRUE) +
+    scale_fill_manual(name = NULL, values = "grey", labels = "Scheduled Event") +
+    geom_line(aes(y = Count, group = Sensor_ID, color = Type)) +
+    facet_wrap(vars(Type), ncol = 1, nrow = 2) +
+    scale_y_continuous(labels = scales::label_comma(), breaks = scales::breaks_extended(6), expand = c(0,0)) +
+    scale_x_datetime(date_breaks = "6 hours", labels = scales::label_time(format = "%d %b\n %H:%M"), expand = c(0,0)) +
+    labs(x = NULL, y = "No. of Pedestrians", color = "Type (All Sensors)", fill = "Schedulded Event") +
+    theme_minimal() +
+    guides(colour = guide_legend(nrow = 2, title.position = "left", byrow = FALSE)) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.line.y =  element_line(),
+          axis.ticks.y = element_line(),
+          axis.line.x =  element_line(),
+          axis.ticks.x = element_line(),
+          strip.text.x = element_blank(),
+          legend.position = "top",
+          legend.box.just = "center"
+    )
   })
   
   # Temporal Plot
   output$plot_temporal <- renderPlot({
-    eventfilter() %>% 
-      left_join(outlier_sensors, by = c("Event", "Event_Date_Time_Start")) %>% 
-      ggplot(aes(x= Start, y = Scale, colour = Scale_factor)) +
+    outlier_sensors %>% 
+      filter(Event_ID == eventfilter()$Event_ID, Event_Date_Time_Start == eventfilter()$Event_Date_Time_Start) %>% 
+    ### eventfilter() %>% 
+    ###   left_join(outlier_sensors, by = c("Event", "Event_Date_Time_Start")) %>% 
+      ggplot(aes(x= Start, y = Scale, colour = as.factor(Scale))) +
       geom_linerange(aes(xmin = Start, xmax = End + hms("01:00:00")), size = 10, na.rm = TRUE) +
       theme_classic() +
       scale_colour_manual(name = "Temporal Spans",
+                          breaks = c("1", "2", "3", "4", "5"),
                           values = c("1" = scales::hue_pal()(5)[1],
                                      "2" = scales::hue_pal()(5)[2],
                                      "3" = scales::hue_pal()(5)[3],
                                      "4" = scales::hue_pal()(5)[4],
                                      "5" = scales::hue_pal()(5)[5]),
                           labels = c("1" = "Scheduled Event",
-                                     "2" = "Level 1 to 2 Outliers",
+                                     "2" = "Event Temporal Span: Level 1 & 2 Outliers",
                                      "3" = "Level 3 Outliers",
                                      "4" = "Level 4 Outliers",
                                      "5" = "Level 5 Outliers"), 
                           drop = FALSE) +
       scale_x_datetime(date_breaks = "6 hours", labels = scales::label_time(format = "%d %b\n%H:%M")) +
       labs(x = "Time") +
-      guides(colour = guide_legend(nrow = 2, title.position = "left", byrow = FALSE)) +
       theme(
         axis.line.y = element_blank(),
         axis.title.y = element_blank(),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank(),
         legend.position = "top",
-        legend.box.just = "center",
         plot.margin = margin(0, 10, 0, 0, unit = "pt")
       )
   })
   
   # Outlier Plot
-  output$plot_outliers <- renderPlot({
-    outliers <- eventfilter() %>%
-      left_join(outlier_hour, by = c("Event", "Event_Date_Time_Start"))
-    
-    ggplot() +
-      geom_sf(data = map_streetsped, inherit.aes =  FALSE, color = "black",
-              size = 0.1, alpha = 0.2) +
-      geom_sf(data = map_streets, inherit.aes = FALSE, color = "black",
-              size = 0.3, alpha = 0.2) +
-      geom_sf(data = map_rail, inherit.aes = FALSE, color = "grey",
-              size = 0.2, linetype = "dotdash", alpha = 0.5) +
-      geom_sf(data = outliers, aes(geometry = geometry, color = Scale, size = Scale)) +
-      geom_sf(data = st_as_sf(sensorloc, coords = c("Longitude", "Latitude"), crs = 4326), aes(color = "L0", size = "L0")) +
-      scale_size_manual(name = "Outliers",
-                        breaks = c("2", "3", "4", "5", "L0"),
-                        values = c("L0" = 1, "2" = 3, "3" = 5, "4" = 7, "5" = 9),
-                        labels = c("2" = "Level 1 to 2", "3" = "Level 3", "4" = "Level 4", "5" ="Level 5", "L0" = "Pedestrian Sensors"),
-                        drop = FALSE) +
-      scale_colour_manual(name = "Outliers",
-                          breaks = c("2", "3", "4", "5", "L0"),
-                          values = c("L0" = "black",
-                                     "2" = scales::hue_pal()(5)[2],
-                                     "3" = scales::hue_pal()(5)[3],
-                                     "4" = scales::hue_pal()(5)[4],
-                                     "5" = scales::hue_pal()(5)[5]),
-                          labels = c("2" = "Level 1 to 2", "3" = "Level 3", "4" = "Level 4", "5" ="Level 5", "L0" = "Pedestrian Sensors"),
-                          drop = FALSE) +
-      guides(color = guide_legend(nrow = 2, title.position = "left", byrow = FALSE),
-             size = guide_legend(nrow = 2, title.position = "left", byrow = FALSE)) +
-      coord_sf(xlim = c(144.9380 , 144.9764), ylim = c(-37.8250, -37.7958), expand = FALSE) +
-      theme_void() +
-      theme(legend.position = "top", legend.box.just = "center", strip.text.x = element_text(vjust = 1))
+  output$plot_outliers <- renderLeaflet({
+    leaflet(outlier_hour) %>%
+      addProviderTiles(#providers$Stamen.TonerLite,
+                      providers$CartoDB.Positron,
+                       options = providerTileOptions(noWrap = TRUE)) %>% 
+                        fitBounds(~min(Longitude), ~min(Latitude), ~max(Longitude), ~max(Latitude)) 
   })
   
-  # Before-and-after clustering
+  outliersfilter <- reactive({
+    outlier_hour %>%
+      filter(Event_ID == input$chosen_event) %>% 
+      arrange(desc(Scale))
+  })
+
+  observe({
+    leafletProxy("plot_outliers", data = outliersfilter()) %>%
+      clearShapes() %>%
+      addCircleMarkers(lng = ~Longitude, lat = ~Latitude, 
+                       radius = ~(3^sqrt(as.numeric(levels(Scale))[Scale])), 
+                       stroke = FALSE,
+    fillColor = ~scales::hue_pal()(5)[as.numeric(levels(Scale))[Scale]],
+    fillOpacity = ~as.numeric(levels(Scale))[Scale]*(-.3) + 1.6, weight = 2) %>% 
+      addLegend(color = ~scales::hue_pal()(5)[2:5], 
+                labels = ~levels(Scale))  
+  })
+  
+  # output$plot_outliers <- renderPlot({
+  #   # outliers <- eventfilter() %>%
+  #     # left_join(outlier_hour, by = c("Event", "Event_Date_Time_Start"))
+  # 
+  #   # ggplot() +
+  #   #   geom_sf(data = map_streetsped, inherit.aes =  FALSE, color = "black",
+  #   #           size = 0.1, alpha = 0.2) +
+  #   #   geom_sf(data = map_streets, inherit.aes = FALSE, color = "black",
+  #   #           size = 0.3, alpha = 0.2) +
+  #   #   geom_sf(data = map_rail, inherit.aes = FALSE, color = "grey",
+  #   #           size = 0.2, linetype = "dotdash", alpha = 0.5) +
+  #   #   geom_sf(data = outliers, aes(geometry = geometry, color = Scale, size = Scale)) +
+  #   #   geom_sf(data = st_as_sf(sensorloc, coords = c("Longitude", "Latitude"), crs = 4326), aes(color = "L0", size = "L0")) +
+  #   #   scale_size_manual(name = "Outliers",
+  #   #                     breaks = c("2", "3", "4", "5", "L0"),
+  #   #                     values = c("L0" = 1, "2" = 3, "3" = 5, "4" = 7, "5" = 9),
+  #   #                     labels = c("2" = "Level 1 to 2", "3" = "Level 3", "4" = "Level 4", "5" ="Level 5", "L0" = "Pedestrian Sensors"),
+  #   #                     drop = FALSE) +
+  #   #   scale_colour_manual(name = "Outliers",
+  #   #                       breaks = c("2", "3", "4", "5", "L0"),
+  #   #                       values = c("L0" = "black",
+  #   #                                  "2" = scales::hue_pal()(5)[2],
+  #   #                                  "3" = scales::hue_pal()(5)[3],
+  #   #                                  "4" = scales::hue_pal()(5)[4],
+  #   #                                  "5" = scales::hue_pal()(5)[5]),
+  #   #                       labels = c("2" = "Level 1 to 2", "3" = "Level 3", "4" = "Level 4", "5" ="Level 5", "L0" = "Pedestrian Sensors"),
+  #   #                       drop = FALSE) +
+  #   #   guides(color = guide_legend(nrow = 1, title.position = "left", byrow = FALSE)) +
+  #   #   coord_sf(xlim = c(144.9380 , 144.9800), ylim = c(-37.8250, -37.7930), expand = FALSE) +
+  #   #   theme_void() +
+  #   #   theme(legend.position = "top", legend.box.just = "center", strip.text.x = element_text(vjust = 1))
+  # })
+
   event_before_after <- reactive({
     event_before_after <- eventfilter() %>%
-      left_join(before_after, by = c("Event", "Event_Date_Time_Start"))
+      left_join(before_after, by = c("Event", "Event_Date_Time_Start", "Event_Date_Time_End", "Event_Temporal_Start", "Event_Temporal_End", "Event_Temporal_Span", "Date"))
     
     event_cluster <- event_before_after %>%
       select(
@@ -316,19 +327,19 @@ server <- function(input, output) {
         names_sep = "_"
       ) %>%
       mutate_all(~ifelse(is.na(.x), mean(.x, na.rm = TRUE), .x))
-    
+  
     # Clustering
     sensor_cluster <- event_cluster %>%
       select(-c(Sensor_ID)) %>%
       # standardise each column
       scale() %>%
       kmeans(centers = input$ncluster, nstart = 50, iter.max = 100)
-    
+  
     event_cluster[["Cluster"]] <- sensor_cluster[["cluster"]]
-    
+  
     sensorgroups <- event_cluster %>%
       select(Sensor_ID, Cluster)
-    
+  
     event_before_after %>%
       left_join(sensorgroups, by = "Sensor_ID") %>%
       group_by(Cluster, Date_Time) %>%
@@ -354,7 +365,7 @@ server <- function(input, output) {
       geom_sf(data = sensor_cluster, aes(color = factor(Cluster)), size = 3) +
       labs(colour = "Cluster") +
       guides(colour = guide_legend(nrow = 1, title.position = "left", byrow = FALSE)) +
-      coord_sf(xlim = c(144.9380 , 144.9764), ylim = c(-37.8250, -37.7958), expand = FALSE) +
+      coord_sf(xlim = c(144.9380 , 144.9800), ylim = c(-37.8250, -37.7930), expand = FALSE) +
       theme_void() +
       theme(legend.position = "top", legend.box.just = "center")
   })
@@ -390,45 +401,20 @@ server <- function(input, output) {
             axis.line.y =  element_line(),
             axis.ticks.y = element_line(),
             panel.spacing = unit(2.5, "lines"),
-            plot.margin = margin(0, 10, 0, 0, unit = "pt"),
+            plot.margin = margin(0, 10, 0, 0, unit = "pt")
       ) +
       coord_cartesian(clip = "off") +
       facet_wrap(vars(Cluster), ncol = 1)
   })
-  
+
   # Event Summary
-  # Outliers Detected: No. sensors during event
-  output$outliersdetected <- reactive({
-    outliers <- eventfilter() %>%
-      left_join(outlier_sensors, by = c("Event", "Event_Date_Time_Start")) %>% 
-      ungroup() %>% 
-      summarise(Sensors = sum(!is.na(unique(Sensor_ID))))
-    
-    paste0("Outliers were detected at ", outliers$Sensors, " pedestrian counting sensors")
-  })
+  # Outliers Detected
   
-  # Event Temporal Span of Effect
-  output$temporalspan <- reactive({
-    paste0(eventfilter()$Event,
-           " has an effect on the network between ",
-           format(eventfilter()$Event_Temporal_Start, "%b %d %H:%M"),
-           " till ",
-           format(eventfilter()$Event_Temporal_End, "%b %d %H:%M"))
-  })
-  
-  # # Average Increase/Decrease Per Cluster
-  output$clustersummary <- renderDataTable({
-    event_before_after() %>%
-      group_by(Cluster, Date_Time) %>%
-      summarise(Change =  mean(Difference[is.finite(Difference)], na.rm = TRUE)) %>%
-      mutate("Date and Time" = format(Date_Time, "%b %d %H:%M"), 
-             # Change = round(Change, 1)
-             Change = formatC(Change, digits = 0, big.mark = ",", format = "f", flag = "+")
-      )  %>%
-      pivot_wider(names_from = "Cluster", values_from = "Change", names_prefix = "Cluster ") %>% select(-c(Date_Time))
-  },
-  # options = list(columnDefs = list(list(class = "dt-right", targets = "_all")))
-  )
+  # chosen_events_summary <- chosen_events %>%
+  #   group_by(Event, Cluster) %>%
+  #   summarise(Average_Difference = mean(Difference[is.finite(Difference)], na.rm = TRUE)) %>%
+  #   ungroup() %>%
+  #   pivot_wider(id_cols = Cluster, names_from = Event, values_from = Average_Difference)
   
 }
 
